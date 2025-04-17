@@ -1,9 +1,8 @@
 
 
-POST http://localhost:3000/login HTTP/1.1
-Content-Type: application/json
+GET http://localhost:3000/test HTTP/1.1
+Authorization: Bearer L6OE7GRCKCY3B5LMLLSKNWXIAMHTVNS26SXHZVMNFJCE76WJODZY5HCD325U4YGZH3O2F55H3CPL6QN3OJQ3XTDJEILHWYHGEIFTQQNAOKTDQN2VV5PLGMNN4BSCGASL
 
-{
-    "password" : "hello"
-}
+
+
 

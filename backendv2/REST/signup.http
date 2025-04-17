@@ -5,9 +5,10 @@ Content-Type: application/json
 {
   "firstname" : "John",
   "lastname": "Doe",
-  "email" : "johndoe@user.com",
+  "email" : "johndoe@user24.com",
   "password" :"HelloWorld",
+  "vehicletype": "electric",
   "preferences" : {
-    "age" : 10
+    "shortest_routes" : true
   }
 }

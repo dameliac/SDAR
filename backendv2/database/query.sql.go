@@ -12,8 +12,8 @@ import (
 )
 
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO ` + "`" + `Users` + "`" + ` (first_name, last_name, email , preferences, password_hash)
-VALUES (? , ? , ?, ? , ?)
+INSERT INTO ` + "`" + `Users` + "`" + ` (first_name, last_name, email , preferences, vehicle_type , password_hash)
+VALUES (? , ? , ?, ? , ? , ?)
 `
 
 type CreateUserParams struct {
@@ -21,6 +21,7 @@ type CreateUserParams struct {
 	LastName     string
 	Email        string
 	Preferences  json.RawMessage
+	VehicleType  string
 	PasswordHash string
 }
 
@@ -30,12 +31,13 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 		arg.LastName,
 		arg.Email,
 		arg.Preferences,
+		arg.VehicleType,
 		arg.PasswordHash,
 	)
 }
 
 const getUser = `-- name: GetUser :one
-SELECT user_id, first_name, password_hash, last_name, email, preferences, created_at FROM Users
+SELECT user_id, first_name, password_hash, last_name, email, vehicle_type, preferences, created_at FROM Users
 WHERE user_id = ? LIMIT 1
 `
 
@@ -48,6 +50,7 @@ func (q *Queries) GetUser(ctx context.Context, userID int32) (User, error) {
 		&i.PasswordHash,
 		&i.LastName,
 		&i.Email,
+		&i.VehicleType,
 		&i.Preferences,
 		&i.CreatedAt,
 	)

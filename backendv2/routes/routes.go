@@ -4,6 +4,7 @@ import (
 	"backend/functions"
 	"backend/models"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -100,11 +101,13 @@ func checkErrors(errors ...error) error {
 func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 
 	createBody, bodyErr := io.ReadAll(r.Body)
+	encoder := json.NewEncoder(w)
+
 	defer r.Body.Close()
 
 	if bodyErr != nil {
 		log.Println(bodyErr)
-		http.Error(w, "Something went wrong on your end", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("%v", bodyErr), http.StatusBadRequest)
 		return
 	}
 
@@ -114,27 +117,58 @@ func CreateNewUser(w http.ResponseWriter, r *http.Request) {
 
 	if parseErr != nil {
 		log.Println(parseErr)
-		http.Error(w, "Something went wrong on your end", http.StatusBadRequest)
+		http.Error(w, fmt.Sprintf("%v", parseErr), http.StatusBadRequest)
 		return
 	}
 
-	token, err := App.CreateNewUser(data)
+	// log.Println(data.VehicleType)
+
+	isValid, missingValues := functions.IsValidUser(data)
+	if !isValid {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		encoder.Encode(
+			map[string]any{
+				"status":         "error",
+				"message":        "Validation failed",
+				"missing_fields": missingValues,
+			},
+		)
+		return
+	}
+
+	user_id, token, err := App.CreateNewUser(data)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("%v", err), http.StatusInternalServerError)
 		return
 	}
 
 	response := map[string]any{
+		"status":       "success",
 		"access_token": token,
-		"user":         map[string]any{
-			// "id"
+		"user": map[string]any{
+			"id":           user_id,
+			"email":        data.Email,
+			"firstName":    data.Firstname,
+			"lastname":     data.LastName,
+			"vehicle_type": data.VehicleType,
+			"preferences":  data.Preferences,
 		},
 	}
 
-	encoder := json.NewEncoder(w)
+	//TODO , save in a session
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 
 	encoder.Encode(response)
 	// log.Println(data)
 
+}
+
+func TestSession(w http.ResponseWriter, r *http.Request) {
+	val := r.Context().Value("user_id")
+
+	log.Println(val)
 }

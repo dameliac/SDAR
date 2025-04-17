@@ -6,5 +6,6 @@ type User struct {
 	LastName    string
 	Email       string
 	Password    string
+	VehicleType string
 	Preferences map[string]any
 }

@@ -15,6 +15,7 @@ type User struct {
 	PasswordHash string
 	LastName     string
 	Email        string
+	VehicleType  string
 	Preferences  json.RawMessage
 	CreatedAt    sql.NullTime
 }
