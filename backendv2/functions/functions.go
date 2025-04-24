@@ -97,7 +97,6 @@ func (app *App) CreateNewUser(user models.User) (int64, string, error) {
 	hashed_password, hashing_err := hashPassword(user.Password)
 
 	if hashing_err != nil {
-		log.Println("oops")
 		return -1, "", hashing_err
 	}
 
@@ -118,7 +117,6 @@ func (app *App) CreateNewUser(user models.User) (int64, string, error) {
 
 	if result_err != nil {
 
-		log.Println("here")
 		return -1, "", result_err
 	}
 

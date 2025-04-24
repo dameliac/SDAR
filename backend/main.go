@@ -16,6 +16,14 @@ func main() {
 		// serves static files from the provided public dir (if exists)
 		se.Router.GET("/{path...}", apis.Static(os.DirFS("./pb_public"), false))
 
+		se.Router.GET("/hello", func(e *core.RequestEvent) error {
+			return e.JSON(200, map[string]interface{}{"name": 1, "hello": "world"})
+		})
+
+		se.Router.GET("/hello-world", func(e *core.RequestEvent) error {
+			return e.String(200, "Hello World")
+		})
+
 		return se.Next()
 	})
 
