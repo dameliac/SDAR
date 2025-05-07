@@ -23,7 +23,7 @@ class _StateProfilePage extends State<ProfilePage> {
       header: FHeader(title: const Text("Profile")),
       content: Column(
         children: [
-          Text('Hello World'),
+          Text(context.watch<AppProvider>().index.toString()),
           FButton(
   label: const Text('Logout'),
   onPress: () {

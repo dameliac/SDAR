@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           builder:
-              (context, child) => FTheme(data: FThemes.zinc.light, child: child!),
+              (context, child) => FTheme(data: FThemes.blue.light, child: child!),
           home:  AuthWrapper(),
         ),
     );
