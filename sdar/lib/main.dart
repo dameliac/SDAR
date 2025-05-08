@@ -10,6 +10,7 @@ import 'package:sdar/profile.dart';
 import 'package:sdar/trips.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 void main() {
   runApp(ChangeNotifierProvider(
@@ -99,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
           index: app.index,
           children: [Home(), Messages(), Trips(), History(), ProfilePage()],
         ),
-      
+      //NAVIGATION BAR
         footer: FBottomNavigationBar(
           index: app.index,
           onChange: (index) => setState(() => app.index = index),
@@ -118,7 +119,7 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
       
             FBottomNavigationBarItem(
-              icon: FIcon(FAssets.icons.libraryBig),
+              icon: SvgPicture.asset('assets/images/lets-icons--ticket-alt.svg',width: 24, height: 24,),
               label: const Text('History'),
             ),
             FBottomNavigationBarItem(
