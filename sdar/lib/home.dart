@@ -218,7 +218,7 @@ class _StateHome extends State<Home> {
                     ),
                     const SizedBox(height: 20),
                     FTile(
-                      prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
+                      prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217,)),
                       title: const Text('Nearby Travel Services'),
                       // subtitle: const Text('subtitle'),
                       // details: const Text('View'),
@@ -227,6 +227,7 @@ class _StateHome extends State<Home> {
                       enabled: true,
                       onPress: () {
                         app.setIndex(3);
+                        
                       },
                       onLongPress: () {},
                     ),
