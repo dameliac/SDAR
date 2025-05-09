@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
+//import 'package:flutter/src/rendering/box.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -19,13 +20,69 @@ class _StateProfilePage extends State<ProfilePage> {
 
     @override
   Widget build(BuildContext context) {
-    final drivername =context.watch<AppProvider>().driverName;
+    final drivername =context.watch<AppProvider>().driverName; //trying to get username - check App Provider
+    final enabledBoxDecoration = BoxDecoration(
+      color: const Color.fromRGBO(53, 124, 247, 1), // primary
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    final enabledHoverBoxDecoration = BoxDecoration(
+      color: const Color.fromRGBO(45, 110, 220, 1), // darker shade for hover
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    final disabledBoxDecoration = BoxDecoration(
+      color: Colors.grey.shade300,
+      borderRadius: BorderRadius.circular(5),
+    );
+
     return FScaffold(
-      header: FHeader(title: const Text("Your Profile", textAlign: TextAlign.center,)),
+      header: FHeader(
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            IconButton(
+              onPressed: () {
+                // Your onPressed logic here
+              },
+              icon: const Icon(Icons.arrow_back, color: Colors.black,),
+            ),
+            const SizedBox(width: 70), 
+            const Text(
+              "Your Profile",
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+
       content: Column(
         children: [
+          //EDIT BUTTON
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              Container(
+                padding: EdgeInsets.only(bottom: 1),
+                width: 140,
+                height: 45,
+                //alignment: Alignment.centerRight,
+                decoration: BoxDecoration(
+                 // borderRadius: BorderRadius.circular(5)
+                ),    
+                child: FButton(onPress: (){}, label: const Text('Edit Profile'),style: 
+                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+                disabledBoxDecoration: disabledBoxDecoration, 
+                focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
+                contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+                disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+                enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+                iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+                spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))),),//EDIT PROFILE
+              ), 
+
+            ],),
           
-          FButton(onPress: (){}, label: const Text('Edit Profile')),//EDIT PROFILE
           const SizedBox(height: 10,),
           SizedBox(
             width: double.infinity,
@@ -59,8 +116,146 @@ class _StateProfilePage extends State<ProfilePage> {
           //     labelText: 'Vehicle Type:'
           //   ),
           // ),
-          const SizedBox(height: 10,),
+          
+          //VEHICLE TYPE
+          Container(
+            width: double.infinity,
+            height: 48,
+            decoration: ShapeDecoration(
+            color: const Color(0xFFF3F6F3),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            ),
+            alignment: Alignment.centerLeft,
+            child: RichText(text: TextSpan(
+            children: [
+              TextSpan(
+                text: '  Vehicle Type:',
+                style: TextStyle(fontWeight: FontWeight.bold,
+                color: Colors.black),
+                                        
+              ),
 
+
+              TextSpan(
+                text: '  Hybrid', //REPLACE WITH ACTUAL TYPE
+                style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.black
+                    )
+                  )
+                ]
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          //OPTIMISATION PRIORITY
+          Container(
+            width: double.infinity,
+            height: 48,
+            decoration: ShapeDecoration(
+            color: const Color(0xFFF3F6F3),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            ),
+            alignment: Alignment.centerLeft,
+            child: RichText(text: TextSpan(
+            children: [
+              TextSpan(
+              text: '  Optimisation Priority:',
+              style: TextStyle(fontWeight: FontWeight.bold,
+              color: Colors.black),
+
+                                            
+              ),
+                      
+              TextSpan(
+                text: ' Fastest Route', //REPLACE WITH ACTUAL TYPE
+                style: TextStyle(
+                fontWeight: FontWeight.normal,
+                color: Colors.black
+                )
+                  )
+                ]
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+         //HOME
+          Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: ShapeDecoration(
+                      color: const Color(0xFFF3F6F3),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                    ),
+                    alignment: Alignment.centerLeft,
+                    child: RichText(text: TextSpan(
+                      children: [
+                        TextSpan(
+                          text: '  Home:',
+                          style: TextStyle(fontWeight: FontWeight.bold,
+                          color: Colors.black),
+
+                                            
+                        ),
+                      
+                        TextSpan(
+                          text: ' Rockfort, Kingston', //REPLACE WITH ACTUAL TYPE
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            color: Colors.black
+                          )
+                        )
+                      ]
+                    )),
+                  ),
+          const SizedBox(height: 10),
+          //WORK
+          Container(
+                width: double.infinity,
+                height: 48,
+                decoration: ShapeDecoration(
+                  color: const Color(0xFFF3F6F3),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+                ),
+                alignment: Alignment.centerLeft,
+                child: RichText(text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: '  Work:',
+                      style: TextStyle(fontWeight: FontWeight.bold,
+                      color: Colors.black),
+
+                                        
+                    ),
+                  
+                    TextSpan(
+                      text: ' 20 Hope Road', //REPLACE WITH ACTUAL TYPE
+                      style: TextStyle(
+                        fontWeight: FontWeight.normal,
+                        color: Colors.black
+                      )
+                    )
+                  ]
+                )),
+              ),
+          const SizedBox(height: 15),
+         Container(
+            width: double.infinity,
+            alignment: Alignment.centerLeft,
+            child: const Text(
+              'Travel Data',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ),
+          const SizedBox(height: 10),
+          FTile(
+            prefixIcon: FIcon(FAssets.icons.save, color: const Color.fromRGBO(53, 124, 247, 1),),
+            title: Text('Store Travel Information'),
+            suffixIcon: FIcon(FAssets.icons.chevronRight,),
+            semanticLabel: 'Label',
+            enabled: true,
+            ),
+          const SizedBox(height: 30),
           //Logout Button
           FButton(
             label: const Text('Logout'),
@@ -69,6 +264,15 @@ class _StateProfilePage extends State<ProfilePage> {
               Provider.of<AppProvider>(context,listen:false).logout();
               Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> LoginPage()));
             },
+            style: 
+                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+                disabledBoxDecoration: disabledBoxDecoration, 
+                focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
+                contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+                disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+                enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+                iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+                spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154)))
           ) ,
         ],
       )

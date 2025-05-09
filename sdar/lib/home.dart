@@ -62,6 +62,7 @@ class _StateHome extends State<Home> {
                                 ),
                                 onChanged: (value) {
                                   // Perform search logic
+                                  //direct to trips screen
                                 },
                               ),
                             ),

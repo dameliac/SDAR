@@ -31,7 +31,26 @@ class MyApp extends StatelessWidget {
         child: MaterialApp(
           debugShowCheckedModeBanner: false,
           builder:
-              (context, child) => FTheme(data: FThemes.blue.light, child: child!),
+              (context, child) => FTheme(data: FThemeData(
+                colorScheme: const FColorScheme(
+                          primary: Color.fromRGBO(53, 124, 247, 1),
+                          secondary: Color.fromRGBO(193, 240, 169, 1),
+                          background: Colors.white,
+                          foreground: Colors.black,
+                          primaryForeground: Colors.white,
+                          secondaryForeground: Colors.black,
+                          brightness: Brightness.light,
+                          barrier: Colors.black54,
+                          muted: Color(0xFFE0E0E0),
+                          mutedForeground: Color(0xFF616161),
+                          destructive: Color(0xFFFF5A5F),
+                          destructiveForeground: Colors.white,
+                          error: Colors.red,
+                          errorForeground: Colors.white,
+                          border: Color(0xFFD1D5DB),
+                        )
+                      ), 
+                      child: child!),
           home:  AuthWrapper(),
         ),
     );
