@@ -272,7 +272,6 @@ class _StateSignupPage extends State<SignupPage> {
 
                     final password = _passwordController.text;
                     final confirmPassword = _confirmPasswordController.text;
-                    final name = _nameController.text;
                     final email = _emailController.text;
 
                     final success = await Provider.of<AppProvider>(
@@ -282,9 +281,7 @@ class _StateSignupPage extends State<SignupPage> {
                       password,
                       confirmPassword,
                       email,
-                      name,
-                      type,
-                      optimization,
+            
                     );
                     if (success) {
                       toastification.show(

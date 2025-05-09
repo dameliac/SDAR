@@ -9,6 +9,7 @@ class AppProvider extends ChangeNotifier {
   late AuthStore store;
   bool isLoggedIn = false;
   bool isInitialized = false;
+  String? driverName;
 
   void setIndex(int i) {
     index = i;
@@ -25,6 +26,34 @@ class AppProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> loadDriverName() async{
+    driverName = await fetchUserName();
+    notifyListeners();
+  }
+
+
+
+
+  //TO DISPLAY USER NAME
+  Future<String?> fetchUserName() async{
+  try{
+    final userID = userdata?.record.id;
+    if (userID == null) return null;
+
+    final driver = await pb
+      .collection('Driver')
+      .getFirstListItem('user = "$userID"');
+    
+    final firstName = driver.getStringValue('FirstName');
+    final lastName = driver.getStringValue('LastName');
+    return '$firstName $lastName';
+  }catch(e){
+    print("Error fetching driver's name: $e");
+    return null;
+  }
+}
+
+
    Future<bool> login(String username , String password) async {
     try {
       userdata = await pb
@@ -35,6 +64,7 @@ class AppProvider extends ChangeNotifier {
       if (store.isValid) {
         isLoggedIn = true;
         // Logger().e(userdata);
+        await loadDriverName();
         return true;
       }
     } catch (e) {
@@ -95,9 +125,9 @@ class AppProvider extends ChangeNotifier {
     password,
     passwordConfirm,
     email,
-    name,
-    vehicle_type,
-    optimization,
+    // name,
+    // vehicle_type,
+    // optimization,
   ) async {
     final body = <String, dynamic>{
       "password": password,
@@ -105,9 +135,9 @@ class AppProvider extends ChangeNotifier {
       "email": email,
       "emailVisibility": true,
       // "verified": true,
-      "name": name,
-      "vehicle_type": vehicle_type,
-      "optimization": optimization,
+      // "name": name,
+      // "vehicle_type": vehicle_type,
+      // "optimization": optimization,
     };
 
     RecordModel? record;
