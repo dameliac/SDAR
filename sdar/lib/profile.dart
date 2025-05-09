@@ -39,20 +39,24 @@ class _StateProfilePage extends State<ProfilePage> {
 
     return FScaffold(
       header: FHeader(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.start,
+        title: Stack(
+          alignment: Alignment.center,
           children: [
-            IconButton(
-              onPressed: () {
-                // Your onPressed logic here
-                
-              },
-              icon: const Icon(Icons.arrow_back, color: Colors.black,),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: () {
+                  // Your onPressed logic here
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+              ),
             ),
-            const SizedBox(width: 70), 
-            const Text(
-              "Your Profile",
-              textAlign: TextAlign.center,
+            const Center(
+              child: Text(
+                "Your Profile",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           ],
         ),
