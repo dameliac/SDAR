@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
+import 'package:sdar/main.dart';
 //import 'package:flutter/src/rendering/box.dart';
 
 
@@ -44,6 +45,7 @@ class _StateProfilePage extends State<ProfilePage> {
             IconButton(
               onPressed: () {
                 // Your onPressed logic here
+                
               },
               icon: const Icon(Icons.arrow_back, color: Colors.black,),
             ),
@@ -70,8 +72,9 @@ class _StateProfilePage extends State<ProfilePage> {
                 decoration: BoxDecoration(
                  // borderRadius: BorderRadius.circular(5)
                 ),    
-                child: FButton(onPress: (){}, label: const Text('Edit Profile'),style: 
-                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+                child: FButton(onPress: (){}, 
+                label: const Text('Edit Profile'),
+                style: FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
                 disabledBoxDecoration: disabledBoxDecoration, 
                 focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
                 contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
