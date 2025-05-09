@@ -197,7 +197,7 @@ class HistoryCard extends StatelessWidget{
                 Text(DateFormat('MMM d').format(date)),
                 Text('JMD \$${cost}'),
                 Text('${distance} km'),
-                Text('${emissions} kg'),
+                Text('${emissions} CO2'),
                  
               ],
             ),
