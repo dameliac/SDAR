@@ -70,6 +70,11 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/lets-icons--ticket-alt.svg
+    - assets/images/logo.png
+    - assets/images/vecteezy_3d-icon-notification-bell-a-ringing-bell-indicating-alerts_60511166.png
+    - assets/images/vecteezy_elegant-rustic-map-with-marked-route-folded-transparent_57155239.png
+    - assets/images/vecteezy_extraordinary-abstract-d-stack-of-coins-with-financial_57411371.png
+    - assets/images/vecteezy_vibrant-modern-financial-graph-chart-upward-trend-isolated_57435486.png
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
 
