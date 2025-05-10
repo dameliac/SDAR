@@ -67,7 +67,7 @@ class _StateMessages extends State<Messages> {
             ),
             Center(
               child: Text(
-                "Travel History",
+                "Notifications",
                 textAlign: TextAlign.center,
                 style:  GoogleFonts.inter(
                         textStyle: TextStyle(fontSize: 30, fontWeight:FontWeight.w700 , color: Colors.black)),
