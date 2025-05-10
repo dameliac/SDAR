@@ -63,7 +63,7 @@ class _StateProfilePage extends State<ProfilePage> {
           ],
         ),
       ),
-      footer: AppNavbar(index: 4),
+      
       content: Column(
         children: [
           //EDIT BUTTON

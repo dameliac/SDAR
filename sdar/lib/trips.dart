@@ -45,6 +45,7 @@ class _StateTrips extends State<Trips> {
             ),
           ],
         )),
+      
       content: SingleChildScrollView(
         child: Container(
           width: double.infinity,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:sdar/widgets/appNavBar.dart';
 
 
 
@@ -71,6 +72,7 @@ class _StateHistory extends State<History> {
             ),
           ],
         )),
+      
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
