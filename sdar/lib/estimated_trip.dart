@@ -191,16 +191,16 @@ class EstimateCard extends StatelessWidget{
                         ),
                          
                          SizedBox( 
-                          width: 20,
+                          width: 40,
                           child: Icon(Icons.circle_rounded, size: 10,)),
                           SizedBox(
-                            width: 160,
+                            width: 140,
                             child:Text('${timelength} hr'), 
 
 
                           ),
                           SizedBox(
-                            width: 120,
+                            width: 100,
                             child:Text(DateFormat('MMM d yyyy').format(date))
                           )
                       ],
