@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:forui/forui.dart';
 import 'package:latlong2/latlong.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Trips extends StatefulWidget {
   const Trips({super.key});
@@ -20,7 +21,28 @@ class _StateTrips extends State<Trips> {
   Widget build(BuildContext context) {
     return FScaffold(
       contentPad: false,
-      header: FHeader(title: const Text("Trips")),
+      header: FHeader(title: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: () {
+                  // Your onPressed logic here
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+              ),
+            ),
+            Center(
+              child: Text(
+                "Trips",
+                textAlign: TextAlign.center,
+                style:  GoogleFonts.inter(
+                        textStyle: TextStyle(fontSize: 30, fontWeight:FontWeight.w700 , color: Colors.black)),
+              ),
+            ),
+          ],
+        )),
       content: SingleChildScrollView(
         child: Container(
           width: double.infinity,
@@ -47,14 +69,15 @@ class _StateTrips extends State<Trips> {
                   ),
                   children: [
                     TileLayer(
-                      urlTemplate:
+                      urlTemplate: //From OPENSTREETMAP
                           'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                       userAgentPackageName: 'com.yourcompany.sdar',
                     ),
                   ],
                 ),
               ),
-              Text("Hello World"),
+              //Text("Hello World")
+              const SizedBox(height: 10,),
               FTextField(
                 controller: _fromController, // TextEditingController
                 clearable: (value) => value.text.isNotEmpty,

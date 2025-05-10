@@ -69,7 +69,7 @@ class _StateProfilePage extends State<ProfilePage> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               Container(
-                padding: EdgeInsets.only(bottom: 1),
+                //padding: EdgeInsets.only(bottom: 1),
                 width: 140,
                 height: 45,
                 //alignment: Alignment.centerRight,

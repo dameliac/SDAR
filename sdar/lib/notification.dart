@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 class Messages extends StatefulWidget {
@@ -52,7 +53,28 @@ class _StateMessages extends State<Messages> {
   Widget build(BuildContext context) {
     final grouped = groupNotifications(notifications);
     return FScaffold(
-      header: FHeader(title: const Text("Notifications")),
+      header: FHeader(title: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: () {
+                  // Your onPressed logic here
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
+              ),
+            ),
+            Center(
+              child: Text(
+                "Travel History",
+                textAlign: TextAlign.center,
+                style:  GoogleFonts.inter(
+                        textStyle: TextStyle(fontSize: 30, fontWeight:FontWeight.w700 , color: Colors.black)),
+              ),
+            ),
+          ],
+        )),
         content: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
