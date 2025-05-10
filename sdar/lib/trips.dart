@@ -3,6 +3,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:forui/forui.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sdar/planned_trips.dart';
 
 class Trips extends StatefulWidget {
   const Trips({super.key});
@@ -336,7 +337,9 @@ class _StateTrips extends State<Trips> {
                   const SizedBox(height: 30),
                   /// Optimise button
                   FButton(
-                    onPress: () {},
+                    onPress: () {
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> PlannedTripsPage()));
+                    },
                     label: const Text('Save Trip'),
                   ),
                 ],
