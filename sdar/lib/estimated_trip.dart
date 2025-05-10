@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import 'package:sdar/AddCommute.dart';
-import 'package:sdar/EditCommute.dart';
+import 'package:sdar/EditEstimateTrip.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 
@@ -264,7 +264,7 @@ class EstimateCard extends StatelessWidget{
             child: 
            FButton(
             onPress: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> AddCommutePage()));
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> EditEstimatedTripPage()));
           }, label: Text('Edit',), 
           style: 
                 FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
