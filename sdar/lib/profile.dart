@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
+import 'package:sdar/commute.dart';
 import 'package:sdar/main.dart';
 //import 'package:flutter/src/rendering/box.dart';
 
@@ -261,6 +262,9 @@ class _StateProfilePage extends State<ProfilePage> {
             suffixIcon: FIcon(FAssets.icons.chevronRight,),
             semanticLabel: 'Label',
             enabled: true,
+            onPress: () {
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CommutePage()));
+            },
             ),
           const SizedBox(height: 30),
           //Logout Button

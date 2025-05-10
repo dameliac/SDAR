@@ -7,9 +7,11 @@ import 'package:sdar/auth/login.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/trips.dart';
 import 'package:intl/intl.dart';
+import 'package:sdar/widgets/appNavBar.dart';
 
 class PlannedTripsPage extends StatefulWidget {
-  const PlannedTripsPage({super.key});
+  final String origin; //home or trips 
+  const PlannedTripsPage({super.key, required this.origin});
 
   @override
   State<StatefulWidget> createState() {
@@ -18,7 +20,12 @@ class PlannedTripsPage extends StatefulWidget {
 }
 
 class _StatePlannedTripsPage extends State<PlannedTripsPage>{
+  late final int currentIndex;
   @override
+  void initState() {
+  super.initState();
+  currentIndex = widget.origin == 'home' ? 0 : 2;
+}
   Widget build(BuildContext context){
      final enabledBoxDecoration = BoxDecoration(
       color: const Color.fromRGBO(53, 124, 247, 1), // primary
@@ -72,6 +79,7 @@ class _StatePlannedTripsPage extends State<PlannedTripsPage>{
           ],
         ),
         ),
+        footer: AppNavbar(index: currentIndex),
         content: Column(
           children: [
           //EDIT BUTTON

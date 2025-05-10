@@ -338,7 +338,7 @@ class _StateTrips extends State<Trips> {
                   /// Optimise button
                   FButton(
                     onPress: () {
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> PlannedTripsPage()));
+                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> const PlannedTripsPage(origin:'trips')));
                     },
                     label: const Text('Save Trip'),
                   ),
