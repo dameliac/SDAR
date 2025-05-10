@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
 import 'package:sdar/commute.dart';
 import 'package:sdar/main.dart';
+import 'package:sdar/widgets/appNavBar.dart';
 //import 'package:flutter/src/rendering/box.dart';
 
 
@@ -62,7 +63,7 @@ class _StateProfilePage extends State<ProfilePage> {
           ],
         ),
       ),
-
+      footer: AppNavbar(index: 4),
       content: Column(
         children: [
           //EDIT BUTTON
