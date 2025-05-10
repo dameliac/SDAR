@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:sdar/AddCommute.dart';
+import 'package:sdar/EditCommute.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 
@@ -142,7 +143,12 @@ class CommuteCard extends StatelessWidget{
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text('Arrive by $time'),
-              Icon(Icons.more_horiz),
+              IconButton(
+                icon:Icon(Icons.more_horiz),
+                onPressed: () {
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditCommutePage()));
+                },
+              )
             ],
           ),
           const SizedBox(height: 8),

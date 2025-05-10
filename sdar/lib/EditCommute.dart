@@ -4,25 +4,35 @@ import 'package:forui/forui.dart';
 import 'package:sdar/commute.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 
-class AddCommutePage extends StatefulWidget {
+class EditCommutePage extends StatefulWidget {
   
-  const AddCommutePage({super.key});
+  const EditCommutePage({super.key});
 
   @override
   State<StatefulWidget> createState() {
-    return _StateAddCommutePage();
+    return _StateEditCommutePage();
   }
 }
 
-class _StateAddCommutePage extends State<AddCommutePage>{
+class _StateEditCommutePage extends State<EditCommutePage>{
   bool _RemindMe = true;
    final enabledBoxDecoration = BoxDecoration(
       color: const Color.fromRGBO(53, 124, 247, 1), // primary
       borderRadius: BorderRadius.circular(5),
     );
 
+    final enabledBoxDecoration2 = BoxDecoration(
+      color: const Color.fromARGB(222, 243, 25, 25), 
+      borderRadius: BorderRadius.circular(5),
+    );
+
     final enabledHoverBoxDecoration = BoxDecoration(
       color: const Color.fromRGBO(45, 110, 220, 1), // darker shade for hover
+      borderRadius: BorderRadius.circular(5),
+    );
+
+    final enabledHoverBoxDecoration2 = BoxDecoration(
+      color: const Color.fromARGB(255, 190, 19, 19),  // darker shade for hover
       borderRadius: BorderRadius.circular(5),
     );
 
@@ -50,7 +60,7 @@ class _StateAddCommutePage extends State<AddCommutePage>{
             ),
             const Center(
               child: Text(
-                "Add a Commute",
+                "Edit Commute",
                 textAlign: TextAlign.center,
                 style: TextStyle(color: Colors.black),
               ),
@@ -174,39 +184,29 @@ class _StateAddCommutePage extends State<AddCommutePage>{
           Align(alignment: Alignment.centerLeft,
           child:Text('Select Commute Day/s', style: TextStyle(fontWeight: FontWeight.bold),),),
           const SizedBox(height: 10,),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: [
-            
-          //   Material(
-          //   child:const Chip(label: Text('S'), backgroundColor:Color.fromRGBO(243, 246, 243, 1) ,) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('M'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('T'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('W'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('T'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('F'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('S'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // )
-          // ],)
+         
           Material(
             child: 
           const DaySelectorChips()),
-           const SizedBox(height: 50,),
+          const SizedBox(height: 50,),
+
+           FButton(onPress: (){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> EditCommutePage()));
+          }, label: Text('Delete Commute', style: TextStyle(fontWeight: FontWeight.bold),), style: 
+                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration2, enabledHoverBoxDecoration: enabledHoverBoxDecoration2, 
+                disabledBoxDecoration: disabledBoxDecoration, 
+                focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromARGB(222, 243, 25, 25),  borderRadius: BorderRadius.circular(5)), 
+                contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+                disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+                enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+                iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+                spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154)))),
+          const SizedBox(height: 10,),
+
+
           FButton(onPress: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> AddCommutePage()));
-          }, label: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),), style: 
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CommutePage()));
+          }, label: Text('Save Changes', style: TextStyle(fontWeight: FontWeight.bold),), style: 
                 FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
                 disabledBoxDecoration: disabledBoxDecoration, 
                 focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
