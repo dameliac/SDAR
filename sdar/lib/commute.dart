@@ -1,12 +1,8 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
-import 'package:sdar/app_provider.dart';
-import 'package:provider/provider.dart';
-import 'package:sdar/auth/login.dart';
+import 'package:sdar/AddCommute.dart';
 import 'package:sdar/main.dart';
-import 'package:sdar/trips.dart';
-import 'package:intl/intl.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 
 class CommutePage extends StatefulWidget {
@@ -94,7 +90,9 @@ class _StateCommutePage extends State<CommutePage>{
             Notification: route['notification'],
           )),
           const SizedBox(height: 30),
-          FButton(onPress: (){}, label: Text('Add Commute', style: TextStyle(fontWeight: FontWeight.bold),), style: 
+          FButton(onPress: (){
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> AddCommutePage()));
+          }, label: Text('Add Commute', style: TextStyle(fontWeight: FontWeight.bold),), style: 
                 FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
                 disabledBoxDecoration: disabledBoxDecoration, 
                 focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
