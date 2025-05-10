@@ -145,6 +145,7 @@ class CommuteCard extends StatelessWidget{
               Text('Arrive by $time'),
               IconButton(
                 icon:Icon(Icons.more_horiz),
+                tooltip: 'Edit Commute',
                 onPressed: () {
                   Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditCommutePage()));
                 },

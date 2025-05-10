@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:sdar/commute.dart';
+import 'package:sdar/estimated_trip.dart';
+import 'package:sdar/planned_trips.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -89,7 +92,12 @@ class _StateHome extends State<Home> {
                     childAspectRatio: 2.0,
                     children: [
                       //FIRST TILE
-                      Container(
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>PlannedTripsPage(origin: 'home')));
+                          // Add your navigation or logic here
+                        },
+                      child: Container(
                         decoration: BoxDecoration(
                           color: Color.fromRGBO(123, 189, 255, 1),//first tile colour
                           borderRadius: BorderRadius.circular(5),
@@ -104,9 +112,14 @@ class _StateHome extends State<Home> {
                             )
                           ],
                         ),
-                      ),
+                      ),),
                       //SECOND TILE
-                      Container(
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CommutePage()));
+                          // Add your navigation or logic here
+                        },
+                        child:Container(
                         decoration: BoxDecoration(
                           color: Color.fromRGBO(243, 107, 107, 1),//second tile colour
                           borderRadius: BorderRadius.circular(5),
@@ -122,8 +135,14 @@ class _StateHome extends State<Home> {
 
                           ],
                         ),
-                      ),
+                      ),),
                       //THIRD TILE
+                      GestureDetector(
+                        onTap: () {
+                          //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>PlannedTripsPage(origin: 'home')));
+                          // Add your navigation or logic here
+                        },
+                        child:
                       Container(
                         decoration: BoxDecoration(
                           color: Color.fromRGBO(249, 234, 104, 1),//third tile colour
@@ -139,8 +158,14 @@ class _StateHome extends State<Home> {
                             )
                           ],
                         ),
-                      ),
+                      ),),
                       //FOURTH TILE
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EstimatedTripPage()));
+                          // Add your navigation or logic here
+                        },
+                        child:
                       Container(
                         decoration: BoxDecoration(
                       
@@ -158,7 +183,7 @@ class _StateHome extends State<Home> {
 
                           ],
                         ),
-                      ),
+                      ),),
                       // FTile(
                       //   title: const Text('Planned Trips'),
                       //   suffixIcon: Image.asset("assets/images/vecteezy_elegant-rustic-map-with-marked-route-folded-transparent_57155239.png", width: 60, height: 60,),

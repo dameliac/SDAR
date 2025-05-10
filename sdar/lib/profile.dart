@@ -263,7 +263,7 @@ class _StateProfilePage extends State<ProfilePage> {
             semanticLabel: 'Label',
             enabled: true,
             onPress: () {
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CommutePage()));
+              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CommutePage()));
             },
             ),
           const SizedBox(height: 30),
