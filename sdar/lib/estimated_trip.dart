@@ -74,27 +74,26 @@ class _StateEstimatedTripPage extends State<EstimatedTripPage>{
         ),
         ),
         footer: AppNavbar(index: 0),
-        content: Column(
-          children: [
-         
-           const SizedBox(height: 16),
-
-      // Estimate Cards
+        content: SingleChildScrollView(
+  padding: const EdgeInsets.all(16), // Optional: for breathing room
+  child: Column(
+    children: [
+      const SizedBox(height: 16),
       ...estimate.map((route) => EstimateCard(
-            startLoc: route['startLoc'],
-            destination: route['destination'],
-            distance: route['distance'],
-            timelength: route['timelength'],
-            date: route['date'],
-            Make: route['Make'],
-            Model: route['Model'],
-            Price: route['Price'],
-            Usage: route['Usage'],
-            cost: route['cost'],
-          )),
-          
-         
-        ],),
+        startLoc: route['startLoc'],
+        destination: route['destination'],
+        distance: route['distance'],
+        timelength: route['timelength'],
+        date: route['date'],
+        Make: route['Make'],
+        Model: route['Model'],
+        Price: route['Price'],
+        Usage: route['Usage'],
+        cost: route['cost'],
+      )),
+    ],
+  ),
+),
       );
   }
 }
@@ -123,9 +122,9 @@ class EstimateCard extends StatelessWidget{
      required this.timelength,
      required this.Make,
      required this.Model,
-     required this.Price ,
-     required this.Usage ,
-     required this.cost,
+     required this.Price , //for Fuel/Ev Price
+     required this.Usage , //for Fuel/EV Usage
+     required this.cost, //total cost
   }):super(key: key);
 
   @override
@@ -156,34 +155,14 @@ class EstimateCard extends StatelessWidget{
       Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('${timelength} hr'),
-              IconButton(
-                icon:Icon(Icons.more_horiz),
-                onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditCommutePage()));
-                },
-              )
-            ],
-          ),
+          
           const SizedBox(height: 8),
 
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Left-side icons
-              Column(
-                children: [
-                  Icon(Icons.location_pin),
-                  const SizedBox(height: 8),
-                  Icon(Icons.calendar_today_outlined),
-                  const SizedBox(height: 8),
-                  Icon(Icons.notifications_outlined),
-                ],
-              ),
-              const SizedBox(width: 12),
+            
+              const SizedBox(width: 7),
 
               // Main trip details
               Expanded(
@@ -191,27 +170,92 @@ class EstimateCard extends StatelessWidget{
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Row(children: [
-                      Text(startLoc, style: const TextStyle(fontSize: 16)),
+                      Text(startLoc, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
                       Icon(Icons.arrow_forward_sharp),
                       Expanded(
                         child: Text(
                           destination,
-                          style: const TextStyle(fontSize: 16),
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ]),
                     const SizedBox(height: 8),
-                    Text('${distance} km'),
-                    const SizedBox(height: 8),
-                    //Text('Notifications: ${DateFormat("MMM dd YYYY")}'),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(
+                          child: Text('${distance} km'),
+                          width: 65,
+                        ),
+                         
+                         SizedBox( 
+                          width: 20,
+                          child: Icon(Icons.circle_rounded, size: 10,)),
+                          SizedBox(
+                            width: 160,
+                            child:Text('${timelength} hr'), 
+
+
+                          ),
+                          SizedBox(
+                            width: 120,
+                            child:Text(DateFormat('MMM d yyyy').format(date))
+                          )
+                      ],
+                    ),
+                  const SizedBox(height: 15,),
+                   Container(
+                    height: 1,
+                    width: double.infinity,
+                    color: Colors.grey,
+                   ),
+                   const SizedBox(height: 15,),
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Make & Model:', style: TextStyle(fontWeight: FontWeight.bold),),
+                      Text('${Make}, ${Model}')
+                    ],
+                   ),
+                   const SizedBox(height: 8,),
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Fuel/EV Price:', style: TextStyle(fontWeight: FontWeight.bold),),
+                      Text('${Price} per litre or Kilowatts') //Adjust this so that if the car is fuel then it's per litre else per Kilowatts
+                    ],
+                   ),
+                   const SizedBox(height: 8,),
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Fuel/EV Usage:', style: TextStyle(fontWeight: FontWeight.bold),),
+                      Text(Usage) 
+                    ],
+                   ),
+                   const SizedBox(height: 15,),
+                    Container(
+                    height: 1,
+                    width: double.infinity,
+                    color: Colors.grey,
+                   ),
+                   const SizedBox(height: 8,),
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text('Total Cost:', style: TextStyle(fontWeight: FontWeight.bold),),
+                      Text('JMD \$${cost}') 
+                    ],
+                   ),
+                   
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 15),
           Align(
             alignment: Alignment.bottomRight,
             child: 
