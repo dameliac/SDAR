@@ -530,7 +530,7 @@ class _StateTrips extends State<Trips> {
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children:  [
                                   Icon(
                                     Icons.info_outline,
                                     color: Color.fromRGBO(4, 98, 28, 1),
@@ -538,7 +538,7 @@ class _StateTrips extends State<Trips> {
                                   ),
                                   SizedBox(width: 6),
                                   Text(
-                                    "1hr 5 mins • 20 km",
+                                    "${app.duration > 1000? (app.duration / 60).toStringAsFixed(2)  : app.duration } ${app.duration > 1000? 'mins' : 'secs'} • ${app.distance > 1000? (app.distance / 1000).toStringAsFixed(2) : app.distance} ${app.distance > 1000? 'km':'m'}",
                                     style: TextStyle(
                                       color: Color.fromRGBO(4, 98, 28, 1),
                                       fontWeight: FontWeight.w700,

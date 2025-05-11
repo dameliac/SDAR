@@ -30,7 +30,7 @@ def getDistanceTime(client, start, end):
         duration = route['properties']['segments'][0]['duration'] # seconds
         distance = route['properties']['segments'][0]['distance'] # meters
         return {
-            "duration": duration / 60 / 60,
+            "duration": duration,
             "distance": distance,
             "geometry": route['geometry']
         }

@@ -1,6 +1,40 @@
+import requests
+import xml.etree.ElementTree as ET
 
+year = 2012
+make = "Honda"
+model = "Fit"
 
-data = {'geocoding': {'version': '0.2', 'attribution': 'https://openrouteservice.org/terms-of-service/#attribution-geocode', 'query': {'text': 'uwi mona', 'parser': 'pelias', 'parsed_text': {'subject': 'uwi', 'locality': 'mona', 'admin': 'mona'}, 'size': 10, 'layers': ['venue', 'street', 'country', 'macroregion', 'region', 'county', 'localadmin', 'locality', 'borough', 'neighbourhood', 'continent', 'empire', 'dependency', 'macrocounty', 'macrohood', 'microhood', 'disputed', 'postalcode', 'ocean', 'marinearea'], 'private': False, 'boundary.country': ['JAM'], 'lang': {'name': 'English', 'iso6391': 'en', 'iso6393': 'eng', 'via': 'default', 'defaulted': True}, 'querySize': 20}, 'warnings': ["performance optimization: excluding 'address' layer"], 'engine': {'name': 'Pelias', 'author': 'Mapzen', 'version': '1.0'}, 'timestamp': 1746902618240}, 'type': 'FeatureCollection', 'features': [{'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [-76.744092, 17.997747]}, 'properties': {'id': 'node/773948289', 'gid': 'openstreetmap:venue:node/773948289', 'layer': 'venue', 'source': 'openstreetmap', 'source_id': 'node/773948289', 'name': 'UWI Mona Police Station', 'accuracy': 'point', 'country': 'Jamaica', 'country_gid': 'whosonfirst:country:85632215', 'country_a': 'JAM', 'region': 'Saint Andrew', 'region_gid': 'whosonfirst:region:85672609', 'region_a': 'SD', 'continent': 'North America', 'continent_gid': 'whosonfirst:continent:102191575', 'label': 'UWI Mona Police Station, SD, Jamaica'}}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [-76.746869, 18.000515]}, 'properties': {'id': 'way/374967529', 'gid': 'openstreetmap:venue:way/374967529', 'layer': 'venue', 'source': 'openstreetmap', 'source_id': 'way/374967529', 'name': 'UWI Post Office Mona', 'accuracy': 'point', 'country': 'Jamaica', 'country_gid': 'whosonfirst:country:85632215', 'country_a': 'JAM', 'region': 'Saint Andrew', 'region_gid': 'whosonfirst:region:85672609', 'region_a': 'SD', 'continent': 'North America', 'continent_gid': 'whosonfirst:continent:102191575', 'label': 'UWI Post Office Mona, SD, Jamaica'}, 'bbox': [-76.7470118, 18.0003768, -76.7467252, 18.0006521]}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [-76.749814, 18.003058]}, 'properties': {'id': 'way/1049141740', 'gid': 'openstreetmap:venue:way/1049141740', 'layer': 'venue', 'source': 'openstreetmap', 'source_id': 'way/1049141740', 'name': 'UWI (Mona) Garden & Ruins', 'street': 'Gibraltar Road', 'accuracy': 'point', 'country': 'Jamaica', 'country_gid': 'whosonfirst:country:85632215', 'country_a': 'JAM', 'region': 'Saint Andrew', 'region_gid': 'whosonfirst:region:85672609', 'region_a': 'SD', 'continent': 'North America', 'continent_gid': 'whosonfirst:continent:102191575', 'label': 'UWI (Mona) Garden & Ruins, SD, Jamaica', 'addendum': {'osm': {'operator': 'University of the West Indies Mona Campus'}}}, 'bbox': [-76.7498138, 18.0012843, -76.747101, 18.004828]}, {'type': 'Feature', 'geometry': {'type': 'Point', 'coordinates': [-76.74633, 18.00726]}, 'properties': {'id': '3488085', 'gid': 'geonames:venue:3488085', 'layer': 'venue', 'source': 'geonames', 'source_id': '3488085', 'name': 'University of the West Indies Mona (UWI)', 'accuracy': 'point', 'country': 'Jamaica', 'country_gid': 'whosonfirst:country:85632215', 'country_a': 'JAM', 'region': 'Saint Andrew', 'region_gid': 'whosonfirst:region:85672609', 'region_a': 'SD', 'continent': 'North America', 'continent_gid': 'whosonfirst:continent:102191575', 'label': 'University of the West Indies Mona (UWI), SD, Jamaica', 'addendum': {'geonames': {'feature_code': 'UNIV'}}}}], 'bbox': [-76.7498138, 17.997747, -76.744092, 18.00726]}
+# Step 1: Get vehicle options and IDs
+options_url = f"https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?year={year}&make={make}&model={model}"
+response = requests.get(options_url)
 
-for i in data['features']:
-    print(i,end="\n\n")
+if response.status_code == 200:
+    root = ET.fromstring(response.content)
+    for option in root.findall('menuItem'):
+        option_name = option.find('text').text
+        vehicle_id = option.find('value').text
+        print(f"Option: {option_name} | Vehicle ID: {vehicle_id}")
+
+        # Step 2: Get detailed vehicle data for each vehicle ID
+        vehicle_url = f"https://www.fueleconomy.gov/ws/rest/vehicle/{vehicle_id}"
+        vehicle_resp = requests.get(vehicle_url)
+        if vehicle_resp.status_code == 200:
+            vehicle_root = ET.fromstring(vehicle_resp.content)
+
+            # Extract CO2 emissions (grams per mile)
+            co2 = vehicle_root.findtext('co2TailpipeGpm')
+
+            # Extract MPG values
+            city_mpg = vehicle_root.findtext('city08')
+            highway_mpg = vehicle_root.findtext('highway08')
+            combined_mpg = vehicle_root.findtext('comb08')
+
+            print(f"  CO2 Emissions (g/mi): {co2}")
+            print(f"  City MPG: {city_mpg}")
+            print(f"  Highway MPG: {highway_mpg}")
+            print(f"  Combined MPG: {combined_mpg}")
+        else:
+            print("  Failed to retrieve vehicle details")
+else:
+    print("Failed to retrieve vehicle options")

@@ -16,6 +16,8 @@ class AppProvider extends ChangeNotifier {
   bool isLoggedIn = false;
   bool isInitialized = false;
   String? driverName;
+  double distance = 0.0;
+  double duration = 0.0;
 
   var searchResults=[];
   SearchLocation? selectedFromLocation;
@@ -53,6 +55,27 @@ class AppProvider extends ChangeNotifier {
     print(response.data['data']['distance']);
     print(response.data['data']['duration']);
 
+    distance = response.data['data']['distance'];
+    duration = response.data['data']['duration'];
+
+    notifyListeners();
+
+  }
+
+  Future<void> createTrip() async {
+    final body = <String, dynamic>{
+  "Duration": duration,
+  "ETA": "2022-01-01 10:00:00.123Z",
+  "Start_Location": selectedFromLocation == null? ""  : selectedFromLocation!.name,
+  "End_Location": selectedToLocation == null? "" : selectedToLocation!.name,
+  "Execution_Date": "2022-01-01 10:00:00.123Z",
+  "Distance": distance,
+  "fuelConsump": 123
+};
+
+final record = await pb.collection('Route').create(body: body);
+
+print(record); 
   }
 
   void setFromLocation(SearchLocation location){
