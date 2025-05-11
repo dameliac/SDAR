@@ -18,7 +18,7 @@ class MyStackedBarGraph extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: 300,
+          height: 200,
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
@@ -27,8 +27,8 @@ class MyStackedBarGraph extends StatelessWidget {
                 child: RotatedBox(
                   quarterTurns: 3,
                   child: Text(
-                    'Normalized Value (%)',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                    'Normalized (%)',
+                    style: TextStyle(fontSize: 10),
                   ),
                 ),
               ),
@@ -39,36 +39,36 @@ class MyStackedBarGraph extends StatelessWidget {
                     alignment: BarChartAlignment.spaceAround,
                     barGroups: _buildBarGroups(),
                     titlesData: FlTitlesData(
-                     bottomTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 32,
-                        getTitlesWidget: (value, _) {
-                          return Text('T${value.toInt() + 1}', style: const TextStyle(fontSize: 10));
-                        },
+                      bottomTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 32,
+                          getTitlesWidget: (value, _) {
+                            return Text('T${value.toInt() + 1}', style: const TextStyle(fontSize: 10));
+                          },
+                        ),
                       ),
-                    ),
-                     leftTitles: AxisTitles(
-                      sideTitles: SideTitles(
-                        showTitles: true,
-                        reservedSize: 40,
-                        interval: 20,
-                        getTitlesWidget: (value, _) {
-                          if (value % 10 != 0) return const SizedBox.shrink(); // cleaner scale
-                          return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
-                        },
+                      leftTitles: AxisTitles(
+                        sideTitles: SideTitles(
+                          showTitles: true,
+                          reservedSize: 40,
+                          interval: 20,
+                          getTitlesWidget: (value, _) {
+                            if (value % 10 != 0) return const SizedBox.shrink(); // cleaner scale
+                            return Text('${value.toInt()}%', style: const TextStyle(fontSize: 10));
+                          },
+                        ),
                       ),
-                    ),
-
                       topTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                       rightTitles: AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(
                       show: true,
-                        border: const Border(
-                          left: BorderSide(color: Colors.black, width: 1),
-                          bottom: BorderSide(color: Colors.black, width: 1),
-                        )),
+                      border: const Border(
+                        left: BorderSide(color: Colors.black, width: 1),
+                        bottom: BorderSide(color: Colors.black, width: 1),
+                      ),
+                    ),
                     gridData: FlGridData(show: true),
                   ),
                 ),
@@ -79,57 +79,65 @@ class MyStackedBarGraph extends StatelessWidget {
         const SizedBox(height: 3),
         const Text(
           'Trip Index',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 10),
+        ),
+        //const SizedBox(height: 10),
+        // Manual Legend
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            const Text('Total Distance', style: TextStyle(fontSize: 10, color:Colors.blue ),),
+            Container(width: 10,),
+            const Text('Total Distance', style: TextStyle(fontSize: 10,color:  Colors.orange),),
+          ],
         ),
       ],
     );
   }
 
   List<BarChartGroupData> _buildBarGroups() {
-  // Find max values across all segments by index
-  double maxDistance = tripSegments.map((e) => e[0]).reduce((a, b) => a > b ? a : b);
-  double maxTime = tripSegments.map((e) => e[1]).reduce((a, b) => a > b ? a : b);
+    // Find max values across all segments by index
+    double maxDistance = tripSegments.map((e) => e[0]).reduce((a, b) => a > b ? a : b);
+    double maxTime = tripSegments.map((e) => e[1]).reduce((a, b) => a > b ? a : b);
 
-  return List.generate(tripSegments.length, (i) {
-    final trip = tripSegments[i];
+    return List.generate(tripSegments.length, (i) {
+      final trip = tripSegments[i];
 
-    // Normalise each segment to percentage of its type's maximum
-    final normalisedDistance = (trip[0] / maxDistance) * 100;
-    final normalisedTime = (trip[1] / maxTime) * 100;
+      // Normalise each segment to percentage of its type's maximum
+      final normalisedDistance = (trip[0] / maxDistance) * 100;
+      final normalisedTime = (trip[1] / maxTime) * 100;
 
-    double runningTotal = 0;
-    final barRods = [
-      BarChartRodStackItem(
-        runningTotal,
-        runningTotal + normalisedDistance,
-        _getColorForIndex(0),
-      ),
-      BarChartRodStackItem(
-        runningTotal + normalisedDistance,
-        runningTotal + normalisedDistance + normalisedTime,
-        _getColorForIndex(1),
-      ),
-    ];
-
-    return BarChartGroupData(
-      x: i,
-      barRods: [
-        BarChartRodData(
-          toY: normalisedDistance + normalisedTime,
-          rodStackItems: barRods,
-          width: 20,
-          borderRadius: BorderRadius.circular(2),
+      double runningTotal = 0;
+      final barRods = [
+        BarChartRodStackItem(
+          runningTotal,
+          runningTotal + normalisedDistance,
+          _getColorForIndex(0),
         ),
-      ],
-    );
-  });
-}
+        BarChartRodStackItem(
+          runningTotal + normalisedDistance,
+          runningTotal + normalisedDistance + normalisedTime,
+          _getColorForIndex(1),
+        ),
+      ];
 
-
+      return BarChartGroupData(
+        x: i,
+        barRods: [
+          BarChartRodData(
+            toY: normalisedDistance + normalisedTime,
+            rodStackItems: barRods,
+            width: 20, // Adjust bar width as needed
+            borderRadius: BorderRadius.circular(2), // You can adjust radius here
+          ),
+        ],
+      );
+    });
+  }
 
   Color _getColorForIndex(int index) {
-    if (index == 0) return Colors.blue;
-    if (index == 1) return Colors.orange;
-    return Colors.grey;
+    if (index == 0) return Colors.blue; // Distance color
+    if (index == 1) return Colors.orange; // Time color
+    return Colors.grey; // Default color for unassigned segments
   }
 }
