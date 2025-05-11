@@ -1,15 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:dio/dio.dart';
 
+class SearchLocation {
+  String name = "";
+  List<dynamic> coord = [];
+}
 class AppProvider extends ChangeNotifier {
   int index = 0;
+  final dio = Dio();
   late PocketBase pb;
   late RecordAuth? userdata;
   late AuthStore store;
   bool isLoggedIn = false;
   bool isInitialized = false;
   String? driverName;
+
+  var searchResults=[];
+  SearchLocation? selectedFromLocation;
+  SearchLocation? selectedToLocation;
 
   void setIndex(int i) {
     index = i;
@@ -18,6 +28,49 @@ class AppProvider extends ChangeNotifier {
 
   void test() {
     print("Hello ");
+  }
+
+  Future<void> getSearchOptions(String value) async {
+    searchResults.clear();
+    final response = await dio.get('http://localhost:9002/autocomplete/$value');
+    // print(response.data["data"]);
+    for (var data in response.data["data"]){
+      SearchLocation l = SearchLocation();
+      l.name = data["name"];
+
+      l.coord = data["coords"];
+
+      searchResults.add(l);
+      
+
+    }
+    notifyListeners();
+  }
+
+  Future<void> getDistanceTime() async {
+    // final response = await dio.get('http://localhost:9002/distance');
+    final response = await dio.post('http://localhost:9002/distance', data: {'start': selectedFromLocation!.coord, 'end': selectedToLocation!.coord});
+    print(response.data['data']['distance']);
+    print(response.data['data']['duration']);
+
+  }
+
+  void setFromLocation(SearchLocation location){
+    selectedFromLocation  = location;
+    notifyListeners();
+  }
+
+   void setToLocation(SearchLocation location) async{
+    selectedToLocation  = location;
+    if(selectedFromLocation != null && selectedToLocation != null){
+      //TODO 
+      print('${selectedFromLocation!.coord},${selectedToLocation!.coord}');
+      getDistanceTime();
+
+    }
+    notifyListeners();
+
+
   }
 
   void logout() {
