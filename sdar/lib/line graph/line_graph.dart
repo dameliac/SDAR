@@ -16,7 +16,7 @@ class MyLineGraph extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-          height: 300,
+          height: 200,
           child: LineChart(
             LineChartData(
               minY: 0,
@@ -31,7 +31,7 @@ class MyLineGraph extends StatelessWidget {
               ),
               titlesData: FlTitlesData(
                 leftTitles: AxisTitles(
-                  axisNameWidget: const Text('Cost (JMD)', style: TextStyle(fontSize: 12)),
+                  axisNameWidget: const Text('Cost (JMD)', style: TextStyle(fontSize: 10)),
                   axisNameSize: 30,
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -41,7 +41,7 @@ class MyLineGraph extends StatelessWidget {
                   ),
                 ),
                 bottomTitles: AxisTitles(
-                  axisNameWidget: const Text('Trips', style: TextStyle(fontSize: 12)),
+                  axisNameWidget: const Text('Trips', style: TextStyle(fontSize: 10)),
                   axisNameSize: 30,
                   sideTitles: SideTitles(
                     showTitles: true,
@@ -73,14 +73,13 @@ class MyLineGraph extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 16),
-        // Manual Legend
+        //const SizedBox(height: 3),
+        //manual legend
         Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            Container(width: 12, height: 12, color: Colors.blue),
-            const SizedBox(width: 8),
-            const Text('Cost per Trip'),
+            const Text('Total Distance', style: TextStyle(fontSize: 10, color:Colors.blue ),),
+           
           ],
         ),
       ],
