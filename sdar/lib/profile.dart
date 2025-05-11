@@ -5,6 +5,7 @@ import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
 import 'package:sdar/commute.dart';
+import 'package:sdar/editProfile.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 //import 'package:flutter/src/rendering/box.dart';
@@ -78,7 +79,9 @@ class _StateProfilePage extends State<ProfilePage> {
                 decoration: BoxDecoration(
                  // borderRadius: BorderRadius.circular(5)
                 ),    
-                child: FButton(onPress: (){}, 
+                child: FButton(onPress: (){
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder:(context)=> EditProfilePage()));
+                }, 
                 label: const Text('Edit Profile'),
                 style: FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
                 disabledBoxDecoration: disabledBoxDecoration, 
