@@ -82,7 +82,7 @@ class _StateProfilePage extends State<ProfilePage> {
                  // borderRadius: BorderRadius.circular(5)
                 ),    
                 child: FButton(onPress: (){
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder:(context)=> EditProfilePage()));
+                  // Navigator.pushReplacement(context, MaterialPageRoute(builder:(context)=> EditProfilePage()));
                 }, 
                 label: const Text('Edit Profile'),
                 style: FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
