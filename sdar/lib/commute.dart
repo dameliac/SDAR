@@ -147,7 +147,13 @@ class CommuteCard extends StatelessWidget{
                 icon:Icon(Icons.more_horiz),
                 tooltip: 'Edit Commute',
                 onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditCommutePage()));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>EditCommutePage(commuteData: {
+                    'startLoc': startLoc,
+                    'destination': destination,
+                    'remindMe': Notification,
+                    'dropOffTime': time,
+                    'selectedDays':  [false, true, true, true, true, true, false],
+                  })));
                 },
               )
             ],

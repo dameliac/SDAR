@@ -5,17 +5,49 @@ import 'package:sdar/commute.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 
 class EditCommutePage extends StatefulWidget {
-  
-  const EditCommutePage({super.key});
+  final Map<String, dynamic> commuteData;
+
+  const EditCommutePage({
+    super.key,
+    required this.commuteData
+  });
 
   @override
-  State<StatefulWidget> createState() {
-    return _StateEditCommutePage();
-  }
+  State<StatefulWidget> createState() => _StateEditCommutePage();
 }
 
-class _StateEditCommutePage extends State<EditCommutePage>{
-  bool _RemindMe = true;
+
+class _StateEditCommutePage extends State<EditCommutePage> {
+  late TextEditingController _startController;
+  late TextEditingController _destinationController;
+  late TextEditingController _timeController;
+  late bool _RemindMe;
+  late List<bool> _selectedDays;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _startController = TextEditingController(text: widget.commuteData['startLoc'] ?? '');
+    _destinationController = TextEditingController(text: widget.commuteData['destination'] ?? '');
+    _RemindMe = widget.commuteData['remindMe'] ?? true;
+
+
+    _timeController = TextEditingController(
+      text:widget.commuteData['dropOffTime']?? '',
+    );
+
+    _selectedDays = widget.commuteData['selectedDays'] ?? List.filled(7, false);
+  }
+
+  @override
+  void dispose() {
+    _startController.dispose();
+    _destinationController.dispose();
+    _timeController.dispose();
+    super.dispose();
+  }
+
    final enabledBoxDecoration = BoxDecoration(
       color: const Color.fromRGBO(53, 124, 247, 1), // primary
       borderRadius: BorderRadius.circular(5),
@@ -40,7 +72,7 @@ class _StateEditCommutePage extends State<EditCommutePage>{
       color: Colors.grey.shade300,
       borderRadius: BorderRadius.circular(5),
     );
-  TextEditingController _timeController = TextEditingController();
+ 
   @override
   Widget build (BuildContext context){
     return FScaffold(
@@ -77,14 +109,13 @@ class _StateEditCommutePage extends State<EditCommutePage>{
             child:Container(
               padding: EdgeInsets.all(5),
               child: TextField(
-                    textAlign: TextAlign.left,
-                    decoration: InputDecoration(
-                    hintText: 'Enter a starting location',
-                    border: UnderlineInputBorder(borderSide: BorderSide.none)
-                  ),
-                  onSubmitted: (value) {
-                },
-              ) ,
+                controller: _startController,
+                decoration: InputDecoration(
+                  hintText: 'Enter a starting location',
+                  border: UnderlineInputBorder(borderSide: BorderSide.none),
+                ),
+              )
+              ,
             )
           ),
           const SizedBox(height: 20,),
@@ -94,14 +125,13 @@ class _StateEditCommutePage extends State<EditCommutePage>{
             child:Container(
               padding: EdgeInsets.all(5),
               child: TextField(
-                    textAlign: TextAlign.left,
-                    decoration: InputDecoration(
-                    hintText: 'Enter your destination',
-                    border: UnderlineInputBorder(borderSide: BorderSide.none)
-                  ),
-                  onSubmitted: (value) {
-                },
-              ) ,
+                      controller: _startController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter a starting location',
+                        border: UnderlineInputBorder(borderSide: BorderSide.none),
+                      ),
+                    ),
+
             )
           ),
           const SizedBox(height: 40,),
@@ -187,11 +217,23 @@ class _StateEditCommutePage extends State<EditCommutePage>{
          
           Material(
             child: 
-          const DaySelectorChips()),
+          DaySelectorChips(
+            selectedDays: _selectedDays,
+            onSelectionChanged: (newDays) {
+              setState(() {
+                _selectedDays = newDays;
+              });
+            },
+          ),),
           const SizedBox(height: 50,),
 
            FButton(onPress: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> EditCommutePage()));
+            Navigator.pop(context, {
+              'startingLocation': _startController.text,
+              'destination': _destinationController.text,
+              'dropOffTime': _timeController.text,
+              'remindMe': _RemindMe,
+              'selectedDays': _selectedDays,});
           }, label: Text('Delete Commute', style: TextStyle(fontWeight: FontWeight.bold),), style: 
                 FButtonStyle(enabledBoxDecoration: enabledBoxDecoration2, enabledHoverBoxDecoration: enabledHoverBoxDecoration2, 
                 disabledBoxDecoration: disabledBoxDecoration, 
@@ -221,20 +263,32 @@ class _StateEditCommutePage extends State<EditCommutePage>{
   }}
 
 //From ChatGPT
-  class DaySelectorChips extends StatefulWidget {
-  const DaySelectorChips({super.key});
+ class DaySelectorChips extends StatefulWidget {
+  final List<bool> selectedDays;
+  final ValueChanged<List<bool>> onSelectionChanged;
+
+  const DaySelectorChips({
+    required this.selectedDays,
+    required this.onSelectionChanged,
+    super.key,
+  });
 
   @override
   State<DaySelectorChips> createState() => _DaySelectorChipsState();
 }
 
 class _DaySelectorChipsState extends State<DaySelectorChips> {
-  // Days and selection state
-  final List<String> days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  final List<bool> selected = List.filled(7, false);
+  late List<bool> selected;
+
+  @override
+  void initState() {
+    super.initState();
+    selected = List.from(widget.selectedDays);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: List.generate(days.length, (index) {
@@ -244,10 +298,9 @@ class _DaySelectorChipsState extends State<DaySelectorChips> {
           onSelected: (bool value) {
             setState(() {
               selected[index] = value;
+              widget.onSelectionChanged(selected);
             });
           },
-          selectedColor: Theme.of(context).colorScheme.primary,
-          checkmarkColor: Theme.of(context).colorScheme.primary,
         );
       }),
     );
