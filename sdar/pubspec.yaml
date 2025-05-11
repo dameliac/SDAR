@@ -46,6 +46,9 @@ dependencies:
   fl_chart: ^1.0.0
   syncfusion_flutter_charts: ^24.1.0
   image_picker: ^1.0.7
+  http: ^1.1.0
+  geolocator: ^14.0.0
+
 
 
 dev_dependencies:

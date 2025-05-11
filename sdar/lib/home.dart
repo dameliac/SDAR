@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:sdar/EcoTips.dart';
+import 'package:sdar/NearbyTravelSerivces.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/commute.dart';
@@ -253,7 +254,7 @@ class _StateHome extends State<Home> {
                       semanticLabel: 'Label',
                       enabled: true,
                       onPress: () {
-                        app.setIndex(3);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>NearbyStationsMap()));
                         
                       },
                       onLongPress: () {},
