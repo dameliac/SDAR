@@ -43,8 +43,12 @@ dependencies:
   shared_preferences: ^2.5.3
   flutter_map: ^8.1.1
   latlong2: ^0.9.1
+<<<<<<< HEAD
   fl_chart: ^1.0.0
   syncfusion_flutter_charts: ^24.1.0
+=======
+  image_picker: ^1.0.7
+>>>>>>> ed14e7c259afe258734373bf26a18038bb70b4d1
 
 
 dev_dependencies:
