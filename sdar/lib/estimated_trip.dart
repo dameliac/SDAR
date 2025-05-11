@@ -264,7 +264,13 @@ class EstimateCard extends StatelessWidget{
             child: 
            FButton(
             onPress: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> EditEstimatedTripPage()));
+            Navigator.push(context, MaterialPageRoute(builder: (context)=> EditEstimatedTripPage(tripData:{'startLoc': startLoc,
+            'destination': destination,
+            'date': date,
+            'Make': Make,
+            'Model': Model,
+            }
+            )));
           }, label: Text('Edit',), 
           style: 
                 FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
