@@ -15,6 +15,13 @@ class MyLineGraph extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+                const Padding(
+          padding: EdgeInsets.only(bottom: 20),
+          child: Text(
+            'Total Cost Per Trip',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+        ),
         SizedBox(
           height: 200,
           child: LineChart(
