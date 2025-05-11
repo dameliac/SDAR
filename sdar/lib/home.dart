@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:sdar/EcoTips.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/commute.dart';
@@ -257,6 +258,8 @@ class _StateHome extends State<Home> {
                       },
                       onLongPress: () {},
                     ),
+
+                    
                     const SizedBox(height: 10),
 
                     FTile(
@@ -267,33 +270,38 @@ class _StateHome extends State<Home> {
                       suffixIcon: FIcon(FAssets.icons.chevronRight),
                       semanticLabel: 'Label',
                       enabled: true,
-                      onPress: () {},
+                      onPress: () {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Tips()));
+                      },
                       onLongPress: () {},
                     ),
-                    const SizedBox(height: 10),
-                    FTile(
-                      prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
-                      title: const Text('Report Hazards'),
-                      // subtitle: const Text('subtitle'),
-                      // details: const Text('Set'),
-                      suffixIcon: FIcon(FAssets.icons.chevronRight),
-                      semanticLabel: 'Label',
-                      enabled: true,
-                      onPress: () {},
-                      onLongPress: () {},
-                    ),
-                    const SizedBox(height: 10),
-                    FTile(
-                      prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
-                      title: const Text('Alternative Route'),
-                      // subtitle: const Text('subtitle'),
-                      // details: const Text('Set'),
-                      suffixIcon: FIcon(FAssets.icons.chevronRight),
-                      semanticLabel: 'Label',
-                      enabled: true,
-                      onPress: () {},
-                      onLongPress: () {},
-                    ),
+                    
+                    
+                    //FAILED TO IMPLEMENT FEATURES
+                    // const SizedBox(height: 10),
+                    // FTile(
+                    //   prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
+                    //   title: const Text('Report Hazards'),
+                    //   // subtitle: const Text('subtitle'),
+                    //   // details: const Text('Set'),
+                    //   suffixIcon: FIcon(FAssets.icons.chevronRight),
+                    //   semanticLabel: 'Label',
+                    //   enabled: true,
+                    //   onPress: () {},
+                    //   onLongPress: () {},
+                    // ),
+                    // const SizedBox(height: 10),
+                    // FTile(
+                    //   prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
+                    //   title: const Text('Alternative Route'),
+                    //   // subtitle: const Text('subtitle'),
+                    //   // details: const Text('Set'),
+                    //   suffixIcon: FIcon(FAssets.icons.chevronRight),
+                    //   semanticLabel: 'Label',
+                    //   enabled: true,
+                    //   onPress: () {},
+                    //   onLongPress: () {},
+                    // ),
                     const SizedBox(height: 10),
                   ],
                 ),

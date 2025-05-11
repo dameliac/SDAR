@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:sdar/main.dart';
+import 'package:sdar/widgets/appNavBar.dart';
 
 class Tips extends StatefulWidget {
   const Tips({super.key});
@@ -38,6 +40,7 @@ class _StateTips extends State<Tips> {
               child: IconButton(
                 onPressed: () {
                   // Your onPressed logic here
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
                 },
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
               ),
@@ -58,6 +61,7 @@ class _StateTips extends State<Tips> {
           ],
         ),
       ),
+      footer: AppNavbar(index: 0),
       content: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
