@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'package:sdar/commute.dart';
 import 'package:sdar/estimated_trip.dart';
 import 'package:sdar/planned_trips.dart';
+import 'package:sdar/travel_trends.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -139,7 +140,7 @@ class _StateHome extends State<Home> {
                       //THIRD TILE
                       GestureDetector(
                         onTap: () {
-                          //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>PlannedTripsPage(origin: 'home')));
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TravelTrendsPage()));
                           // Add your navigation or logic here
                         },
                         child:
