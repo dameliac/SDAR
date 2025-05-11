@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
 import 'package:sdar/commute.dart';
 import 'package:sdar/main.dart';
+import 'package:sdar/travel_info.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 //import 'package:flutter/src/rendering/box.dart';
 
@@ -49,6 +50,7 @@ class _StateProfilePage extends State<ProfilePage> {
               child: IconButton(
                 onPressed: () {
                   // Your onPressed logic here
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
                 },
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
               ),
@@ -264,7 +266,7 @@ class _StateProfilePage extends State<ProfilePage> {
             semanticLabel: 'Label',
             enabled: true,
             onPress: () {
-              //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CommutePage()));
+              Navigator.push(context, MaterialPageRoute(builder: (context)=>TravelInfoPage()));
             },
             ),
           const SizedBox(height: 30),
