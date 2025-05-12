@@ -4,7 +4,10 @@ import 'package:intl/intl.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/helper/helper_notify.dart';
+import 'package:provider/provider.dart';
+import 'package:sdar/app_provider.dart'; 
 import 'package:pocketbase/pocketbase.dart';
+
 
 class Messages extends StatefulWidget {
   const Messages({super.key});
@@ -17,66 +20,63 @@ class Messages extends StatefulWidget {
 
 class _StateMessages extends State<Messages> {
   List<NotificationCard> notifications = [];
-  final pb = PocketBase('http://localhost:8090');
+   late PocketBase pb;
+  
 
-  @override
-  void initState() {
-    super.initState();
+ @override
+void initState() {
+  super.initState();
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    pb = appProvider.pb;
     fetchUserNotifications();
-  }
+  });
+}
+
 
   Future<void> fetchUserNotifications() async {
     try {
-      // Check if the user is authenticated
-      if (pb.authStore.isValid) {
-        final userId = pb.authStore.model?.id; // Get current user ID
+     final appProvider = Provider.of<AppProvider>(context, listen: false);
+     final userId = appProvider.userdata?.record.id; // Get current user ID
+     final driverinfo = await pb
+      .collection('Driver')
+      .getFirstListItem('userID = "$userId"');
+     final driverID = driverinfo.id;
 
-        if (userId == null) {
-          throw Exception('User ID is null');
-        }
-
-        // Fetch the current user's driver data (assuming a relation exists in the user model)
-        final user = await pb.collection('users').getOne(userId);
-        final driverId = user.getStringValue('driverId'); // Adjust this if the field name is different
-
-        if (driverId == null) {
-          throw Exception('Driver ID is null');
-        }
-
-        // Fetch notifications for the driver
-        final result = await pb.collection('notifications').getFullList(
-          sort: '-created',
-          filter: 'driver = "$driverId"',  // Filter by the driverId
-        );
-
-        final List<NotificationCard> loaded = result.map((record) {
-          final title = record.getStringValue('title');
-          final message = record.getStringValue('message');
-          final date = DateTime.parse(record.created);
-          final type = record.getStringValue('type');
-          final style = getStyleForType(type);
-
-          return NotificationCard(
-            icon: style.icon,
-            iconBackgroundColor: style.iconBackgroundColor,
-            cardBackgroundColor: style.cardBackgroundColor,
-            title: title,
-            message: message,
-            date: date,
-          );
-        }).toList();
-
-        if (!mounted) return;
-
-        setState(() {
-          notifications = loaded;
-        });
-      } else {
-        // Handle the case when the user is not authenticated
-        print('User is not authenticated');
-        // You could navigate to a login page here, for example:
-        // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => LoginPage()));
+      if(userId == null){
+        print('User ID is null');
+        return;
       }
+
+      final result = await pb.collection('Notification').getFullList(
+        ///sort: '-created',
+        filter: 'driverID = "$driverID"',
+      );
+
+      final List<NotificationCard> loaded = result.map((record) {
+        final title = record.getStringValue('Title');
+        final message = record.getStringValue('Message');
+        // ignore: deprecated_member_use
+        final date = DateTime.parse(record.created);
+        final type = record.getStringValue('NotificationType');
+        final style = getStyleForType(type);
+
+        return NotificationCard(
+          icon: style.icon,
+          iconBackgroundColor: style.iconBackgroundColor,
+          cardBackgroundColor: style.cardBackgroundColor,
+          title: title,
+          message: message,
+          date: date,
+        );
+      }).toList();
+
+      // Ensure the widget is still mounted before calling setState()
+      if (!mounted) return;
+
+      setState(() {
+        notifications = loaded;
+      });
     } catch (e) {
       print('Failed to load notifications: $e');
     }
@@ -94,9 +94,9 @@ class _StateMessages extends State<Messages> {
               alignment: Alignment.centerLeft,
               child: IconButton(
                 onPressed: () {
+                  // Your onPressed logic here
                   Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(builder: (context) => MyHomePage(title: 'SDAR')),
+                    context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'SDAR')),
                   );
                 },
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
@@ -167,6 +167,7 @@ class NotificationCard extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Circular icon
           Container(
             padding: EdgeInsets.all(8),
             decoration: BoxDecoration(
@@ -180,6 +181,7 @@ class NotificationCard extends StatelessWidget {
             ),
           ),
           SizedBox(width: 12),
+          // Text content
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

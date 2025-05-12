@@ -4,13 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class AppProvider extends ChangeNotifier {
   int index = 0;
-  //late PocketBase pb;
-  late RecordAuth? userdata;
+  late PocketBase pb;
+  RecordAuth? userdata;
   late AuthStore store;
   bool isLoggedIn = false;
   bool isInitialized = false;
   String? driverName;
-  var pb = PocketBase('http://localhost:8090');
+  
 
   void setIndex(int i) {
     index = i;
@@ -43,7 +43,7 @@ class AppProvider extends ChangeNotifier {
 
     final driver = await pb
       .collection('Driver')
-      .getFirstListItem('user = "$userID"');
+      .getFirstListItem('userID = "$userID"');
     
     final firstName = driver.getStringValue('FirstName');
     final lastName = driver.getStringValue('LastName');
