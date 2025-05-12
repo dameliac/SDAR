@@ -8,6 +8,7 @@ import 'package:sdar/commute.dart';
 import 'package:sdar/estimated_trip.dart';
 import 'package:sdar/planned_trips.dart';
 import 'package:sdar/travel_trends.dart';
+import 'package:sdar/trips.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -66,9 +67,8 @@ class _StateHome extends State<Home> {
                                   hintText: 'Plan Trips...',
                                   border: InputBorder.none,
                                 ),
-                                onChanged: (value) {
-                                  // Perform search logic
-                                  //direct to trips screen
+                                onTap: () {
+                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Trips()));
                                 },
                               ),
                             ),
