@@ -43,28 +43,13 @@ class _StateProfilePage extends State<ProfilePage> {
     return Consumer<AppProvider>(
       builder: (context, value, child) => FScaffold(
         header: FHeader(
-          title: Stack(
-            alignment: Alignment.center,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () {
-                    // Your onPressed logic here
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
-                  },
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                ),
-              ),
-              const Center(
-                child: Text(
+          title: Text(
                   "Your Profile",
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.black),
+                  style: TextStyle(color: Colors.black,
+                  fontSize: 24
+                  ),
                 ),
-              ),
-            ],
-          ),
         ),
         
         content: SingleChildScrollView(

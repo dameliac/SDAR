@@ -30,7 +30,8 @@ def getDistanceTime(client, start, end):
         return {
             "duration": duration,
             "distance": distance,
-            "geometry": route['geometry']
+            "geometry": route['geometry'],
+            "steps" : route['properties']['segments'][0]['steps']
         }
     # return None
     return None

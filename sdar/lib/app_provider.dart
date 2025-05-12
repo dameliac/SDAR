@@ -22,18 +22,25 @@ class Trip {
 
 class TravelHistory {
   String destination;
+  String start;
   DateTime date;
   double cost;
   double distance;
   double emissions;
 
   TravelHistory({
+    required this.start,
     required this.destination,
     required this.date,
     required this.cost,
     required this.distance,
     required this.emissions,
   });
+}
+
+class Directions {
+  String instruction = "";
+  double distance = 0.0;
 }
 
 
@@ -51,7 +58,9 @@ class AppProvider extends ChangeNotifier {
   double duration = 0.0;
   String driverID = '';
   var searchResults = [];
+
   List<Trip> trips = [];
+  List<Directions> tmp = [];
   List<TravelHistory> travelHistory = [];
   SearchLocation? selectedFromLocation;
   SearchLocation? selectedToLocation;
@@ -66,29 +75,59 @@ class AppProvider extends ChangeNotifier {
   }
 
    Future<void> getTravelHistory() async {
+
+    travelHistory.clear();
+
+
     try {
       final records = await pb.collection('Travel_History').getFullList(
-        expand: 'routeID',
+        expand: 'routeID'
       );
 
       travelHistory.clear();
       
       for (var record in records) {
-        print(record);
-        final route = record.expand['routeID']?[0];
-        if (route != null) {
-          travelHistory.add(
+        // final data
+
+
+        final emm = record.getStringValue('co2_emissions');
+        final distance = record.get<double>('expand.routeID.Distance');
+        final fuel = record.get<double>('expand.routeID.fuelConsump');
+        final destination = record.get<String>('expand.routeID.End_Location');
+        final start = record.get<String>('expand.routeID.Start_Location');
+
+        final driver = await getDriverID();
+        // print(driver);
+
+        final vehicle = await pb.collection('Vehicle').getFirstListItem(
+  'driverID="$driver"',
+);
+
+// print(vehicle);
+
+final co2 = vehicle.getDoubleValue('co2');
+
+        // print(ex);
+        // print(route);
+        
+
+         travelHistory.add(
             TravelHistory(
-              destination: route.getStringValue('End_Location'),
+              start: start,
+              destination: destination,
               date: DateTime.now(),
-              cost: route.getDoubleValue('fuelConsump') * 180, // Assuming fuel cost
-              distance: route.getDoubleValue('Distance'),
-              emissions: record.getDoubleValue('co2_emissions'),
+              cost: fuel * 187.26, // Assuming fuel cost
+              distance: distance / 1000,
+              emissions: (distance * 0.0006213712) * co2,
             ),
           );
-        }
+        // final route = record.expand['routeID']?[0];
+        // if (route != null) {
+         
+        // }
+        // print(travelHistory.length);
       }
-      notifyListeners();
+     notifyListeners();
     } catch (e) {
       print('Error fetching travel history: $e');
       travelHistory.clear();
@@ -210,7 +249,7 @@ return success;
     notifyListeners();
   }
 
-   Future<List<LatLng>> getPolyline(start, end) async {
+   Future <List<LatLng>> getPolyline(start, end) async {
     print("$start , $end");
     try {
       final response = await dio.post(
@@ -220,14 +259,28 @@ return success;
           'end': end,
         },
       );
-  
+
+      List<Directions> steps = [];
       List<LatLng> points = [];
       List<dynamic> coordinates = response.data['data']['geometry']['coordinates'];
+      final lsteps = response.data['data']['steps'];
       
       for (var coord in coordinates) {
        
         points.add(LatLng(coord[1], coord[0]));
+        // print(points);
       }
+
+      for(var step in lsteps){
+        steps.add(
+          Directions()
+          ..distance = step['distance']
+          ..instruction = step['instruction']
+        );
+      }
+
+      // print(steps.length);
+      tmp = steps;
       
       return points;
     } catch (e) {
@@ -416,6 +469,7 @@ return success;
       "VehicleMake": make,
       "VehicleModel": model,
       "VehicleYear": int.parse(year),
+      "co2": response.data['data']['co2']
     };
 
     try {
@@ -505,7 +559,9 @@ return "";
 
     final mpg = await getMPG();
     print(mpg);
-    final fuelConsomption = (0.0006213712 * distance) / mpg;
+
+    final meters = mpg * 1.60934;
+    final fuelConsomption = (3.78541 / meters) * (distance/1000);
 
     final body = <String, dynamic>{
       "Duration": duration,
