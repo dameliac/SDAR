@@ -18,12 +18,20 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
   LatLng? _currentLocation;
   String? _error;
   List<Marker> _stationMarkers = [];
-  
+  DateTime? _lastFetchTime;
+  final Duration _fetchInterval = const Duration(seconds: 30);
+  Stream<Position>? _positionStream;
 
   @override
   void initState() {
     super.initState();
     _getCurrentLocation();
+  }
+
+  @override
+  void dispose() {
+    _positionStream?.drain();
+    super.dispose();
   }
 
   Future<void> _getCurrentLocation() async {
@@ -47,13 +55,31 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
       final latLng = LatLng(position.latitude, position.longitude);
       setState(() => _currentLocation = latLng);
       _fetchNearbyStations(latLng.latitude, latLng.longitude);
+      _listenToLocationChanges();
     } catch (e) {
       setState(() => _error = e.toString());
     }
   }
 
+  void _listenToLocationChanges() {
+    _positionStream = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        distanceFilter: 50,
+      ),
+    ).listen((Position position) {
+      final now = DateTime.now();
+      final latLng = LatLng(position.latitude, position.longitude);
+      setState(() => _currentLocation = latLng);
+
+      if (_lastFetchTime == null || now.difference(_lastFetchTime!) >= _fetchInterval) {
+        _lastFetchTime = now;
+        _fetchNearbyStations(position.latitude, position.longitude);
+      }
+    }) as Stream<Position>?;
+  }
+
   Future<void> _fetchNearbyStations(double lat, double lon) async {
-    //10,000 metre radius
     final query = '''
     [out:json];
     (
@@ -94,7 +120,9 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
               amenity == 'charging_station'
                   ? Icons.electrical_services
                   : Icons.local_gas_station,
-              color: amenity == 'charging_station' ? const Color.fromARGB(255, 7, 197, 35) : Colors.red,
+              color: amenity == 'charging_station'
+                  ? const Color.fromARGB(255, 7, 197, 35)
+                  : Colors.red,
               size: 30,
             ),
           );
@@ -112,15 +140,15 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Stack(
+      appBar: AppBar(
+        title: Stack(
           alignment: Alignment.center,
           children: [
             Align(
               alignment: Alignment.centerLeft,
               child: IconButton(
                 onPressed: () {
-                  // Your onPressed logic here
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'SDAR')));
                 },
                 icon: const Icon(Icons.arrow_back, color: Colors.black),
               ),
@@ -133,7 +161,8 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
               ),
             ),
           ],
-        ),),
+        ),
+      ),
       bottomNavigationBar: AppNavbar(index: 0),
       body: _currentLocation == null
           ? Center(
