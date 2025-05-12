@@ -46,7 +46,7 @@ class _StateTrips extends State<Trips> {
             ),
           ],
         )),
-      footer: AppNavbar(index:2),
+      
       content: SingleChildScrollView(
         child: Container(
           width: double.infinity,
