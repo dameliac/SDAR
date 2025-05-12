@@ -18,6 +18,7 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
   LatLng? _currentLocation;
   String? _error;
   List<Marker> _stationMarkers = [];
+  
 
   @override
   void initState() {
@@ -52,6 +53,7 @@ class _NearbyStationsMapState extends State<NearbyStationsMap> {
   }
 
   Future<void> _fetchNearbyStations(double lat, double lon) async {
+    //10,000 metre radius
     final query = '''
     [out:json];
     (

@@ -4,6 +4,7 @@ import 'package:forui/forui.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:sdar/planned_trips.dart';
+import 'package:sdar/widgets/appNavBar.dart';
 
 class Trips extends StatefulWidget {
   const Trips({super.key});
@@ -45,7 +46,7 @@ class _StateTrips extends State<Trips> {
             ),
           ],
         )),
-      
+      footer: AppNavbar(index:2),
       content: SingleChildScrollView(
         child: Container(
           width: double.infinity,
