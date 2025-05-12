@@ -37,21 +37,21 @@ class _StateCommutePage extends State<CommutePage>{
     
     //TEMPORARY DATA
     final List<Map<String, dynamic>> commute = [
-  {
-    'startLoc':'Home',
-    'destination': 'Alligator Pond, St Elizabeth',
-    'date': 'Mon, Tue, Thu, Fri',
-    'time': '09:30 AM',
-    'notification':true
-  },
-  {
-    'startLoc':'Devon House',
-    'destination': '12 Windsor Avenue, Kingston',
-    'date': 'Mon, Tue, Fri',
-    'time': '02:45 PM',
-    'notification':true
-  },
-];
+      {
+        'startLoc':'Home',
+        'destination': 'Alligator Pond, St Elizabeth',
+        'date': 'Mon, Tue, Thu, Fri',
+        'time': '09:30 AM',
+        'notification':true
+      },
+      {
+        'startLoc':'Devon House',
+        'destination': '12 Windsor Avenue, Kingston',
+        'date': 'Mon, Tue, Fri',
+        'time': '02:45 PM',
+        'notification':true
+      },
+]   ;
 
     return FScaffold(header:FHeader( title: Stack(
           alignment: Alignment.center,

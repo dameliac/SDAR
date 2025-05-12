@@ -1,8 +1,13 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:pocketbase/pocketbase.dart';
+import 'package:provider/provider.dart';
+import 'package:sdar/app_provider.dart';
 import 'package:sdar/commute.dart';
 import 'package:sdar/widgets/appNavBar.dart';
+import 'package:sdar/functions/CommuteService.dart';
+
 
 class AddCommutePage extends StatefulWidget {
   
@@ -15,6 +20,7 @@ class AddCommutePage extends StatefulWidget {
 }
 
 class _StateAddCommutePage extends State<AddCommutePage>{
+  List<bool> _selectedDays = List.filled(7, false);
   bool _RemindMe = true;
    final enabledBoxDecoration = BoxDecoration(
       color: const Color.fromRGBO(53, 124, 247, 1), // primary
@@ -31,6 +37,18 @@ class _StateAddCommutePage extends State<AddCommutePage>{
       borderRadius: BorderRadius.circular(5),
     );
   TextEditingController _timeController = TextEditingController();
+  TextEditingController _startLocationController = TextEditingController();
+  TextEditingController _endLocationController = TextEditingController();
+  TextEditingController _daysController = TextEditingController();
+
+  @override
+  void dispose(){
+    _startLocationController.dispose();
+    _endLocationController.dispose();
+    _timeController.dispose();
+    _daysController.dispose();
+    super.dispose();
+  }
   @override
   Widget build (BuildContext context){
     return FScaffold(
@@ -67,13 +85,13 @@ class _StateAddCommutePage extends State<AddCommutePage>{
             child:Container(
               padding: EdgeInsets.all(5),
               child: TextField(
+                  controller: _startLocationController,
                     textAlign: TextAlign.left,
                     decoration: InputDecoration(
                     hintText: 'Enter a starting location',
                     border: UnderlineInputBorder(borderSide: BorderSide.none)
                   ),
-                  onSubmitted: (value) {
-                },
+               
               ) ,
             )
           ),
@@ -84,13 +102,13 @@ class _StateAddCommutePage extends State<AddCommutePage>{
             child:Container(
               padding: EdgeInsets.all(5),
               child: TextField(
+                controller: _endLocationController,
                     textAlign: TextAlign.left,
                     decoration: InputDecoration(
                     hintText: 'Enter your destination',
                     border: UnderlineInputBorder(borderSide: BorderSide.none)
                   ),
-                  onSubmitted: (value) {
-                },
+               
               ) ,
             )
           ),
@@ -165,8 +183,7 @@ class _StateAddCommutePage extends State<AddCommutePage>{
                     _timeController.text = pickedTime.format(context);
                   }
                 },
-                  onSubmitted: (value) {
-                },
+         
               ) ,
             )
           ),
@@ -174,38 +191,31 @@ class _StateAddCommutePage extends State<AddCommutePage>{
           Align(alignment: Alignment.centerLeft,
           child:Text('Select Commute Day/s', style: TextStyle(fontWeight: FontWeight.bold),),),
           const SizedBox(height: 10,),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          //   children: [
-            
-          //   Material(
-          //   child:const Chip(label: Text('S'), backgroundColor:Color.fromRGBO(243, 246, 243, 1) ,) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('M'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('T'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('W'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('T'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('F'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // ),
-          // Material(
-          //   child:const Chip(label: Text('S'), backgroundColor:Color.fromRGBO(243, 246, 243, 1)) ,
-          // )
-          // ],)
           Material(
-            child: 
-          const DaySelectorChips()),
+            child: DaySelectorChips(onSelectionChanged: (List<bool>selection){
+              setState(() {
+                _selectedDays=List.from(selection);
+              });
+            },)
+          ),
            const SizedBox(height: 50,),
-          FButton(onPress: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> AddCommutePage()));
+          FButton(onPress: ()async{
+            final List<String> allDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
+            final List<String> selectedDays = [
+            for (int i = 0; i < allDays.length; i++)
+              if (_selectedDays[i]) allDays[i]
+          ];
+
+            final commuteService = CommuteService();
+            await commuteService.saveCommute(
+                start: _startLocationController.text,
+                end: _endLocationController.text,
+                days: selectedDays,
+                arriveByTime: _timeController.text,
+                remindMe: _RemindMe,
+              );
+
+            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CommutePage()));
           }, label: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),), style: 
                 FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
                 disabledBoxDecoration: disabledBoxDecoration, 
@@ -221,16 +231,18 @@ class _StateAddCommutePage extends State<AddCommutePage>{
   }}
 
 //From ChatGPT
-  class DaySelectorChips extends StatefulWidget {
-  const DaySelectorChips({super.key});
+
+class DaySelectorChips extends StatefulWidget {
+  final void Function(List<bool>) onSelectionChanged;
+
+  const DaySelectorChips({super.key, required this.onSelectionChanged});
 
   @override
   State<DaySelectorChips> createState() => _DaySelectorChipsState();
 }
 
 class _DaySelectorChipsState extends State<DaySelectorChips> {
-  // Days and selection state
-  final List<String> days = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+  final List<String> days = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
   final List<bool> selected = List.filled(7, false);
 
   @override
@@ -245,6 +257,7 @@ class _DaySelectorChipsState extends State<DaySelectorChips> {
             setState(() {
               selected[index] = value;
             });
+            widget.onSelectionChanged(selected);
           },
           selectedColor: Theme.of(context).colorScheme.primary,
           checkmarkColor: Theme.of(context).colorScheme.primary,
