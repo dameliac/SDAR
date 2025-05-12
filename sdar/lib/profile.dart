@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:pocketbase/pocketbase.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/auth/login.dart';
@@ -10,6 +11,7 @@ import 'package:sdar/main.dart';
 import 'package:sdar/travel_info.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 //import 'package:flutter/src/rendering/box.dart';
+
 
 
 class ProfilePage extends StatefulWidget {
@@ -22,6 +24,105 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _StateProfilePage extends State<ProfilePage> {
+     late PocketBase pb;
+     String? userEmail;
+     String? vehicle_type;
+     String? optimization_priority;
+     String? home;
+     String? work;
+     
+
+
+  
+
+ @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final appProvider = Provider.of<AppProvider>(context, listen: false);
+      pb = appProvider.pb;
+      fetchUserEmail();
+      fetchDriver();
+      fetchVehicleType();
+    });
+  }
+
+  
+
+   Future<void> fetchUserEmail() async {
+  try {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final userId = appProvider.userdata?.record.id;
+
+    if (userId == null) {
+      print('User ID is null');
+      return;
+    }
+
+    final user = await pb.collection('users').getFirstListItem('id = "$userId"');
+
+    setState(() {
+      userEmail = user.getStringValue('email');
+    });
+  } catch (e) {
+    print('Error fetching current user email: $e');
+  }
+}
+
+
+  Future<void> fetchDriver() async {
+    try {
+     final appProvider = Provider.of<AppProvider>(context, listen: false);
+     final userId = appProvider.userdata?.record.id; // Get current user ID
+      
+      if(userId == null){
+        print('User ID is null');
+        return;
+      }
+
+     final driver = await pb.collection('Driver').getFirstListItem('userID = "$userId"');
+     
+      setState(() {
+      optimization_priority = driver.getStringValue('OptimisationPriority');
+      home = driver.getStringValue('Home');
+      work = driver.getStringValue('Work');
+    });
+    }catch(e){
+      print('Error getting driver information: $e');
+    }
+    
+    }
+
+    
+
+Future<void> fetchVehicleType() async {
+  try {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    final userId = appProvider.userdata?.record.id;
+    final driverinfo = await pb
+      .collection('Driver')
+      .getFirstListItem('userID = "$userId"');
+
+     final driverID = driverinfo.id;
+
+    final response = await pb.collection('vehicle').getFullList(
+      filter: 'driverID = "$driverID"',
+    );
+
+    if (response.isNotEmpty) {
+      final record = response.first;
+      setState(() {
+        vehicle_type = record.getStringValue('VehicleType'); 
+      });
+    } else {
+      print('No vehicle record found. $response');
+    }
+  } catch (e) {
+    print('Error getting vehicle type: $e');
+  }
+}
+
+
 
     @override
   Widget build(BuildContext context) {
@@ -117,7 +218,7 @@ class _StateProfilePage extends State<ProfilePage> {
                   const SizedBox(height: 5,),
                   Text('$drivername'),
                   const SizedBox(height: 5,),
-                  const Text('user@user.com'), //replace with actual email
+                  Text(userEmail ?? 'Loading email..'), //replace with actual email
                             
                 ],
               ),
@@ -143,7 +244,7 @@ class _StateProfilePage extends State<ProfilePage> {
             child: RichText(text: TextSpan(
             children: [
               TextSpan(
-                text: '  Vehicle Type:',
+                text: '  Vehicle Type: ',
                 style: TextStyle(fontWeight: FontWeight.bold,
                 color: Colors.black),
                                         
@@ -151,7 +252,7 @@ class _StateProfilePage extends State<ProfilePage> {
 
 
               TextSpan(
-                text: '  Hybrid', //REPLACE WITH ACTUAL TYPE
+                text: vehicle_type, //REPLACE WITH ACTUAL TYPE
                 style: TextStyle(
                 fontWeight: FontWeight.normal,
                 color: Colors.black
@@ -174,7 +275,7 @@ class _StateProfilePage extends State<ProfilePage> {
             child: RichText(text: TextSpan(
             children: [
               TextSpan(
-              text: '  Optimisation Priority:',
+              text: '  Optimisation Priority: ',
               style: TextStyle(fontWeight: FontWeight.bold,
               color: Colors.black),
 
@@ -182,7 +283,7 @@ class _StateProfilePage extends State<ProfilePage> {
               ),
                       
               TextSpan(
-                text: ' Fastest Route', //REPLACE WITH ACTUAL TYPE
+                text: optimization_priority, //REPLACE WITH ACTUAL TYPE
                 style: TextStyle(
                 fontWeight: FontWeight.normal,
                 color: Colors.black
@@ -205,7 +306,7 @@ class _StateProfilePage extends State<ProfilePage> {
                     child: RichText(text: TextSpan(
                       children: [
                         TextSpan(
-                          text: '  Home:',
+                          text: '  Home: ',
                           style: TextStyle(fontWeight: FontWeight.bold,
                           color: Colors.black),
 
@@ -213,7 +314,7 @@ class _StateProfilePage extends State<ProfilePage> {
                         ),
                       
                         TextSpan(
-                          text: ' Rockfort, Kingston', //REPLACE WITH ACTUAL TYPE
+                          text: home, //REPLACE WITH ACTUAL TYPE
                           style: TextStyle(
                             fontWeight: FontWeight.normal,
                             color: Colors.black
@@ -235,7 +336,7 @@ class _StateProfilePage extends State<ProfilePage> {
                 child: RichText(text: TextSpan(
                   children: [
                     TextSpan(
-                      text: '  Work:',
+                      text: '  Work: ',
                       style: TextStyle(fontWeight: FontWeight.bold,
                       color: Colors.black),
 
@@ -243,7 +344,7 @@ class _StateProfilePage extends State<ProfilePage> {
                     ),
                   
                     TextSpan(
-                      text: ' 20 Hope Road', //REPLACE WITH ACTUAL TYPE
+                      text: work , //REPLACE WITH ACTUAL TYPE
                       style: TextStyle(
                         fontWeight: FontWeight.normal,
                         color: Colors.black
@@ -272,7 +373,7 @@ class _StateProfilePage extends State<ProfilePage> {
               Navigator.push(context, MaterialPageRoute(builder: (context)=>TravelInfoPage()));
             },
             ),
-          const SizedBox(height: 30),
+          const SizedBox(height: 20),
           //Logout Button
           FButton(
             label: const Text('Logout'),
