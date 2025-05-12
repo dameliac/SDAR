@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:sdar/app_provider.dart';
 import 'package:sdar/widgets/appNavBar.dart';
-
+import 'package:provider/provider.dart';
 
 
 class History extends StatefulWidget {
@@ -16,130 +17,118 @@ class History extends StatefulWidget {
 }
 
 class _StateHistory extends State<History> {
-  final List<HistoryCard> travelhistory =[ //MODIFY THIS TO COMMODATE MULTIPLE HISTORY
-    HistoryCard(
-      destination: 'Hope Gardens', 
-      date: DateTime(2025, 5, 25), 
-      cost:double.parse('3500.00'), 
-      distance: double.parse('8'), 
-      emissions: double.parse('8.79')),
-    
-    HistoryCard(
-      destination: 'Sovereign North', 
-      date: DateTime(2025, 2, 10), 
-      cost:double.parse('1000.00'), 
-      distance: double.parse('10'), 
-      emissions: double.parse('5')),
+  @override
+  void initState() {
+    super.initState();
+    // Fetch history when page loads
+    Provider.of<AppProvider>(context, listen: false).getTravelHistory();
+  }
 
-    HistoryCard(
-      destination: 'AC Hotel', 
-      date: DateTime(2025, 5, 5), 
-      cost:double.parse('1500.00'), 
-      distance: double.parse('4'), 
-      emissions: double.parse('2.67')),
-    
-    HistoryCard(
-      destination: 'Destiny Rink', 
-      date: DateTime(2025, 6, 28), 
-      cost:double.parse('5500.00'), 
-      distance: double.parse('220'), 
-      emissions: double.parse('28.90')),
-  ];
-
-    @override
+  @override
   Widget build(BuildContext context) {
-    final grouped = groupHistory(travelhistory);
-    return FScaffold(
-      header: FHeader(title: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                onPressed: () {
-                  // Your onPressed logic here
-                },
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-              ),
-            ),
-            Center(
-              child: Text(
-                "Travel History",
-                textAlign: TextAlign.center,
-                style:  GoogleFonts.inter(
-                        textStyle: TextStyle(fontSize: 30, fontWeight:FontWeight.w700 , color: Colors.black)),
-              ),
-            ),
-          ],
-        )),
-      
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-      Row(
-        children: [
-          Expanded(
-            child: Material(
-              borderRadius: BorderRadius.circular(30),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                decoration: BoxDecoration(
-                  color: const Color.fromRGBO(243, 246, 243, 1),
-                  borderRadius: BorderRadius.circular(30),
+    return Consumer<AppProvider>(
+      builder: (context, app, child) {
+        final grouped = groupHistory(app.travelHistory);
+        
+        return FScaffold(
+          header: FHeader(
+            title: Stack(
+              alignment: Alignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    icon: const Icon(Icons.arrow_back, color: Colors.black),
+                  ),
                 ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: TextField(
-                        style: GoogleFonts.comfortaa(
-                            textStyle: const TextStyle(fontSize: 15)),
-                        decoration: const InputDecoration(
-                          hintText: 'Search History...',
-                          border: InputBorder.none,
-                        ),
-                      ),
+                Center(
+                  child: Text(
+                    "Travel History",
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.inter(
+                      textStyle: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.black
+                      )
                     ),
-                    const SizedBox(width: 10),
-                    FIcon(FAssets.icons.search,
-                        color: const Color.fromRGBO(53, 124, 247, 1))
+                  ),
+                ),
+              ],
+            )
+          ),
+          content: app.travelHistory.isEmpty
+            ? const Center(
+                child: Text('No travel history available'),
+              )
+            : SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Search bar (existing code)...
+                    
+                    const SizedBox(height: 20),
+                    
+                    ...grouped.entries.map((entry) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8.0,
+                              vertical: 4
+                            ),
+                            child: Text(
+                              entry.key,
+                              style: GoogleFonts.inter(
+                                textStyle: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 18
+                                )
+                              ),
+                            ),
+                          ),
+                          ListView.builder(
+                            shrinkWrap: true,
+                            physics: NeverScrollableScrollPhysics(),
+                            itemCount: entry.value.length,
+                            itemBuilder: (context, index) {
+                              final history = entry.value[index];
+                              return HistoryCard(
+                                destination: history.destination,
+                                date: history.date,
+                                cost: history.cost,
+                                distance: history.distance,
+                                emissions: history.emissions,
+                              );
+                            },
+                          ),
+                        ],
+                      );
+                    }).toList(),
                   ],
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 10),
-          const Icon(Icons.sort)
-        ],
-      ),
-      const SizedBox(height: 20),
-
-      // Iterate over the grouped history
-      ...grouped.entries.map((entry) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4),
-              child: Text(entry.key, // e.g., "March 2025"
-                  style: GoogleFonts.inter(
-                      textStyle: const TextStyle(
-                          fontWeight: FontWeight.w700, fontSize: 18))),
-            ),
-            ...entry.value, // list of HistoryCards
-          ],
         );
-      }).toList(),
-    ],
-          ),
-        ),
-
+      },
     );
-
-  
   }
 }
 
+///Group Travel History by Date
+Map<String, List<TravelHistory>> groupHistory(List<TravelHistory> travelhistory) {
+  final Map<String, List<TravelHistory>> grouped = {};
+
+  for (var item in travelhistory) {
+    final String key = '${DateFormat('MMMM yyyy').format(item.date)}';
+    grouped.putIfAbsent(key, () => []).add(item);
+  }
+
+  return grouped;
+}
 //Resuable layout for Travel History
 class HistoryCard extends StatelessWidget{
   final String destination;
@@ -212,14 +201,3 @@ class HistoryCard extends StatelessWidget{
   }
 }
 
-//Group Travel History by Date
-Map<String, List<HistoryCard>> groupHistory(List<HistoryCard> travelhistory) {
-  final Map<String, List<HistoryCard>> grouped = {};
-
-  for (var item in travelhistory) {
-    final String key = '${DateFormat('MMMM yyyy').format(item.date)}';
-    grouped.putIfAbsent(key, () => []).add(item);
-  }
-
-  return grouped;
-}

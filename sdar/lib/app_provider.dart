@@ -1,4 +1,7 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:latlong2/latlong.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
@@ -7,6 +10,33 @@ class SearchLocation {
   String name = "";
   List<dynamic> coord = [];
 }
+
+class Trip {
+  String startName = "";
+  String endName = "";
+  double duration = 0.0;
+  String routeID = "";
+  List<double> startCoord = [];
+  List<double> endCoord = [];
+}
+
+class TravelHistory {
+  String destination;
+  DateTime date;
+  double cost;
+  double distance;
+  double emissions;
+
+  TravelHistory({
+    required this.destination,
+    required this.date,
+    required this.cost,
+    required this.distance,
+    required this.emissions,
+  });
+}
+
+
 class AppProvider extends ChangeNotifier {
   int index = 0;
   final dio = Dio();
@@ -16,10 +46,13 @@ class AppProvider extends ChangeNotifier {
   bool isLoggedIn = false;
   bool isInitialized = false;
   String? driverName;
+  String userID = "";
   double distance = 0.0;
   double duration = 0.0;
-
-  var searchResults=[];
+  String driverID = '';
+  var searchResults = [];
+  List<Trip> trips = [];
+  List<TravelHistory> travelHistory = [];
   SearchLocation? selectedFromLocation;
   SearchLocation? selectedToLocation;
 
@@ -32,68 +65,208 @@ class AppProvider extends ChangeNotifier {
     print("Hello ");
   }
 
+   Future<void> getTravelHistory() async {
+    try {
+      final records = await pb.collection('Travel_History').getFullList(
+        expand: 'routeID',
+      );
+
+      travelHistory.clear();
+      
+      for (var record in records) {
+        print(record);
+        final route = record.expand['routeID']?[0];
+        if (route != null) {
+          travelHistory.add(
+            TravelHistory(
+              destination: route.getStringValue('End_Location'),
+              date: DateTime.now(),
+              cost: route.getDoubleValue('fuelConsump') * 180, // Assuming fuel cost
+              distance: route.getDoubleValue('Distance'),
+              emissions: record.getDoubleValue('co2_emissions'),
+            ),
+          );
+        }
+      }
+      notifyListeners();
+    } catch (e) {
+      print('Error fetching travel history: $e');
+      travelHistory.clear();
+    }
+  }
+
+  Future<void> getTrips() async {
+    trips.clear();
+    try {
+      final records = await pb.collection('Route').getFullList(
+        // filter: 'completed = "${true}"',
+      );
+
+      for (var record in records) {
+
+        // print(record.getDoubleValue('duration'));
+        final start = record.getStringValue('Start_Location');
+        final end = record.getStringValue('End_Location');
+        final st_lat  = record.getDoubleValue('start_lat');
+        final st_lng  = record.getDoubleValue('start_long');
+
+        final stop_lng  = record.getDoubleValue('stop_long');
+        final stop_lat  = record.getDoubleValue('stop_lat');
+        final id = record.id;
+
+        Trip trip = Trip()
+        ..startName = start
+        ..endName = end
+        ..startCoord = [st_lat,st_lng]
+        ..endCoord = [stop_lat,stop_lng]
+        ..routeID = id
+        ..duration = record.getDoubleValue('Duration');
+
+        print(trip.startCoord);
+
+        trips.add(trip);
+      }
+
+      notifyListeners();
+    } catch (e) {
+      trips.clear();
+      print(e);
+    }
+  }
+
+  Future<bool> markRouteComplete(route) async {
+    final body = <String, dynamic>{
+  "completed": true
+};
+
+try {
+final record = await pb.collection('Route').update(route, body: body);
+return true;
+} catch(e){
+  print(e);
+  return false;
+}
+
+  }
+
+  Future<bool> markTripComplete(route,co2) async {
+    print(route);
+    final id = await getDriverID();
+//       final driver = await getDriverID();
+//       final body = <String, dynamic>{
+//     "driverID": driver,
+//     "vehicle_VIN": "test",
+//     "routeID": route,
+//     "co2_emissions": 123
+// };
+final body = <String, dynamic>{
+  "driverID": id,
+  "vehicle_VIN": "test",
+  "co2_emissions": 123,
+  "routeID": route
+};
+
+try {
+final record = await pb.collection('Travel_History').create(body: body);
+final success = await markRouteComplete(route);
+return success;
+} catch (e){
+  print(e);
+  return false;
+}
+
+  }
+
   Future<void> getSearchOptions(String value) async {
     searchResults.clear();
     final response = await dio.get('http://localhost:9002/autocomplete/$value');
     // print(response.data["data"]);
-    for (var data in response.data["data"]){
+    for (var data in response.data["data"]) {
       SearchLocation l = SearchLocation();
       l.name = data["name"];
 
       l.coord = data["coords"];
 
       searchResults.add(l);
-      
-
     }
     notifyListeners();
   }
 
   Future<void> getDistanceTime() async {
     // final response = await dio.get('http://localhost:9002/distance');
-    final response = await dio.post('http://localhost:9002/distance', data: {'start': selectedFromLocation!.coord, 'end': selectedToLocation!.coord});
-    print(response.data['data']['distance']);
-    print(response.data['data']['duration']);
+    final response = await dio.post(
+      'http://localhost:9002/distance',
+      data: {
+        'start': selectedFromLocation!.coord,
+        'end': selectedToLocation!.coord,
+      },
+    );
+    // print(response.data['data']['distance']);
+    print(response.data['data']['geometry']['coordinates']);
 
     distance = response.data['data']['distance'];
     duration = response.data['data']['duration'];
 
     notifyListeners();
+  }
 
+   Future<List<LatLng>> getPolyline(start, end) async {
+    print("$start , $end");
+    try {
+      final response = await dio.post(
+        'http://localhost:9002/distance',
+        data: {
+          'start': start,
+          'end': end,
+        },
+      );
+  
+      List<LatLng> points = [];
+      List<dynamic> coordinates = response.data['data']['geometry']['coordinates'];
+      
+      for (var coord in coordinates) {
+       
+        points.add(LatLng(coord[1], coord[0]));
+      }
+      
+      return points;
+    } catch (e) {
+      print('Error getting polyline: $e');
+      return [];
+    }
   }
 
   Future<void> createTrip() async {
     final body = <String, dynamic>{
-  "Duration": duration,
-  "ETA": "2022-01-01 10:00:00.123Z",
-  "Start_Location": selectedFromLocation == null? ""  : selectedFromLocation!.name,
-  "End_Location": selectedToLocation == null? "" : selectedToLocation!.name,
-  "Execution_Date": "2022-01-01 10:00:00.123Z",
-  "Distance": distance,
-  "fuelConsump": 123
-};
+      "Duration": duration,
+      "ETA": "2022-01-01 10:00:00.123Z",
+      "Start_Location":
+          selectedFromLocation == null ? "" : selectedFromLocation!.name,
+      "End_Location":
+          selectedToLocation == null ? "" : selectedToLocation!.name,
+      "Execution_Date": "2022-01-01 10:00:00.123Z",
+      "Distance": distance,
+      "fuelConsump": 123,
+    };
 
-final record = await pb.collection('Route').create(body: body);
+    final record = await pb.collection('Route').create(body: body);
 
-print(record); 
+    print(record);
   }
 
-  void setFromLocation(SearchLocation location){
-    selectedFromLocation  = location;
+  void setFromLocation(SearchLocation location) {
+    selectedFromLocation = location;
     notifyListeners();
   }
 
-   void setToLocation(SearchLocation location) async{
-    selectedToLocation  = location;
-    if(selectedFromLocation != null && selectedToLocation != null){
-      //TODO 
+  void setToLocation(SearchLocation location) async {
+    selectedToLocation = location;
+    if (selectedFromLocation != null && selectedToLocation != null) {
+      //TODO
       print('${selectedFromLocation!.coord},${selectedToLocation!.coord}');
       getDistanceTime();
-
     }
     notifyListeners();
-
-
   }
 
   void logout() {
@@ -102,35 +275,36 @@ print(record);
     notifyListeners();
   }
 
-  Future<void> loadDriverName() async{
+  Future<void> loadDriverName() async {
     driverName = await fetchUserName();
     notifyListeners();
   }
 
-
-
-
   //TO DISPLAY USER NAME
-  Future<String?> fetchUserName() async{
-  try{
-    final userID = userdata?.record.id;
-    if (userID == null) return null;
+  Future<String?> fetchUserName() async {
+    try {
+      final userID = userdata?.record.id;
+      if (userID == null) return null;
 
-    final driver = await pb
-      .collection('Driver')
-      .getFirstListItem('user = "$userID"');
-    
-    final firstName = driver.getStringValue('FirstName');
-    final lastName = driver.getStringValue('LastName');
-    return '$firstName $lastName';
-  }catch(e){
-    print("Error fetching driver's name: $e");
-    return null;
+      final driver = await pb
+          .collection('Driver')
+          .getFirstListItem('userID="$userID"');
+
+      print(driver);
+
+      driverID = driver.id;
+
+      final firstName = driver.getStringValue('FirstName');
+      final lastName = driver.getStringValue('LastName');
+
+      return '$firstName $lastName';
+    } catch (e) {
+      print("Error fetching driver's name: $e");
+      return null;
+    }
   }
-}
 
-
-   Future<bool> login(String username , String password) async {
+  Future<bool> login(String username, String password) async {
     try {
       userdata = await pb
           .collection('users')
@@ -140,6 +314,11 @@ print(record);
       if (store.isValid) {
         isLoggedIn = true;
         // Logger().e(userdata);
+        final record = await pb
+            .collection('Driver')
+            .getFirstListItem('userID="${store.record!.id}"');
+
+        // print(record);
         await loadDriverName();
         return true;
       }
@@ -151,33 +330,32 @@ print(record);
     return false;
   }
 
-    // Add this method to your AppProvider class
+  // Add this method to your AppProvider class
   void clearAppData() {
     // Reset index
     index = 0;
-    
+
     // Clear authentication state
     if (isInitialized) {
       pb.authStore.clear();
     }
-    
+
     // Reset auth-related variables
     isLoggedIn = false;
     isInitialized = false;
-    
+
     // Clear user data
     userdata = null;
-    
+
     // Notify listeners of the changes
     notifyListeners();
-    
+
     print("App data cleared successfully");
   }
 
-   
   Future<bool> ensureInitialized() async {
     if (isInitialized) return true;
-    
+
     try {
       final prefs = await SharedPreferences.getInstance();
 
@@ -197,10 +375,66 @@ print(record);
     }
   }
 
+  Future<bool> createDriver(
+    String firstname,
+    String lastname,
+    String opp,
+    String record,
+  ) async {
+    final body = <String, dynamic>{
+      "userID": record,
+      "FirstName": firstname,
+      "LastName": lastname,
+      "OptimisationPriority": opp,
+    };
+
+    try {
+      final record = await pb.collection('Driver').create(body: body);
+      print(record);
+
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
+  Future<bool> createVehicle(make, model, year) async {
+    final response = await dio.get(
+      'http://localhost:9002/getvehicle/$make/$model/$year',
+    );
+    // print(response.data);
+    // print(store.record!.id);
+    final body = <String, dynamic>{
+      "VIN": "Test",
+      "VehicleRegis": "Test",
+      "VehicleType": "test",
+      "MPG": response.data['data']['cityMPG'],
+      "EVConsump": 123,
+      "GasConsump": 123,
+      "driverID": driverID,
+      "VehicleMake": make,
+      "VehicleModel": model,
+      "VehicleYear": int.parse(year),
+    };
+
+    try {
+      final record = await pb.collection('Vehicle').create(body: body);
+      print(record);
+      return true;
+    } catch (e) {
+      print(e);
+      return false;
+    }
+  }
+
   Future<bool> createUser(
     password,
     passwordConfirm,
     email,
+    firstname,
+    lastname,
+    opp,
     // name,
     // vehicle_type,
     // optimization,
@@ -220,11 +454,82 @@ print(record);
     try {
       final record = await pb.collection('users').create(body: body);
       print(record);
-      final success = await login(email, password);
+      userID = record.id;
 
-      return success;
+      //TODO , create a drvier
+      final success = await createDriver(firstname, lastname, opp, record.id);
+
+      final loggedin = await login(email, password);
+
+      if (loggedin == true) {
+        return success;
+      }
+
+      return false;
     } catch (e) {
       print(e);
+      return false;
+    }
+  }
+
+  Future<String> getDriverID () async {
+    try {
+       final record = await pb.collection('Driver').getFirstListItem(
+  'userID="${store.record!.id}"'
+  // expand: 'relField1,relField2.subRelField',
+  
+);
+    return record.id;
+
+    } catch(e){
+      print(e);
+    }
+
+
+return "";
+  }
+  Future<int> getMPG() async {
+    final id = await getDriverID();
+    try {
+      final record = await pb
+          .collection('Vehicle')
+          .getFirstListItem('driverID="$id"');
+      return record.getIntValue('MPG');
+    } catch (e) {
+      print("Error mpg $e");
+      return 0;
+    }
+  }
+
+  Future<bool> saveTrip() async {
+
+    final mpg = await getMPG();
+    print(mpg);
+    final fuelConsomption = (0.0006213712 * distance) / mpg;
+
+    final body = <String, dynamic>{
+      "Duration": duration,
+      "ETA": "2022-22-22",
+      "Start_Location": selectedFromLocation!.name,
+      "End_Location": selectedToLocation!.name,
+      "Execution_Date": "2022-01-01 10:00:00.123Z",
+      "Distance": distance,
+      "start_coords": selectedFromLocation!.coord.toString(),
+      "start_lat": selectedFromLocation!.coord[0],
+      "start_long" :selectedFromLocation!.coord[1],
+      "stop_lat": selectedToLocation!.coord[0],
+      "stop_long": selectedToLocation!.coord[1],
+      "end_coords": selectedToLocation!.coord.toString(),
+      "fuelConsump": fuelConsomption,
+    };
+
+    // print(body);
+    try {
+      final record = await pb.collection('Route').create(body: body);
+      return true;
+    } catch (e) {
+      print(e);
+      print("ERRRRRRRRRRRRRRRR");
       return false;
     }
   }

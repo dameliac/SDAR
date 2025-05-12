@@ -2,10 +2,8 @@ import openrouteservice
 from openrouteservice.directions import directions
 from flask import *
 import openrouteservice.directions
-
-
-
-coords = ((8.34234,48.23424),(8.34423,48.26424))
+# from vehicle import getInfo
+import vehicle
 
 def getAutoComplete(client ,place:str):
     options = []
@@ -61,7 +59,14 @@ def getDistance():
     # client = openrouteservice.Client(key='5b3ce3597851110001cf62487acddaae03ca4effa06787faa38d46d7')
     # result = getDistanceTime(client, start, end)
         
+@app.route('/getvehicle/<make>/<model>/<year>')
+def getVehicle(make , model , year):
+    data = vehicle.getInfo(make,model,year)
+    if data == False:
+        return {"data":False}
+    return {"data":data}
 
+    
 if __name__ == "__main__":
     app.run(port=9002)
 

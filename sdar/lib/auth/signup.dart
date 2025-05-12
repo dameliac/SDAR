@@ -20,6 +20,8 @@ class SignupPage extends StatefulWidget {
 
 class _StateSignupPage extends State<SignupPage> {
   final _nameController = TextEditingController();
+  final _lastNameController = TextEditingController();
+
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
@@ -37,6 +39,7 @@ class _StateSignupPage extends State<SignupPage> {
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _lastNameController.dispose();
     _confirmPasswordController.dispose();
     opController.dispose();
     controller.dispose();
@@ -67,14 +70,34 @@ class _StateSignupPage extends State<SignupPage> {
               FTextField(
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Please enter your name';
+                    return 'Please enter your first name';
                   }
                   return null;
                 },
                 controller: _nameController,
                 clearable: (value) => value.text.isNotEmpty,
                 enabled: true,
-                label: const Text('Full Name'),
+                label: const Text('First Name'),
+                hint: 'John Doe',
+                description: const Text(
+                  'Enter your full name',
+                  style: TextStyle(fontSize: 13),
+                ),
+                keyboardType: TextInputType.name,
+                textCapitalization: TextCapitalization.words,
+                maxLines: 1,
+              ),
+              FTextField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your last name';
+                  }
+                  return null;
+                },
+                controller: _lastNameController,
+                clearable: (value) => value.text.isNotEmpty,
+                enabled: true,
+                label: const Text('Last Name'),
                 hint: 'John Doe',
                 description: const Text(
                   'Enter your full name',
@@ -206,27 +229,27 @@ class _StateSignupPage extends State<SignupPage> {
               ),
               const SizedBox(height: 20),
 
-              FSelectTileGroup(
-                groupController: controller,
-                label: const Text('Vehicle Type'),
-                description: const Text('Select your vehicle type.'),
-                validator:
-                    (values) =>
-                        values?.isEmpty ?? true
-                            ? 'Please select a value.'
-                            : null,
-                children: [
-                  FSelectTile(
-                    title: const Text('Electric'),
-                    value: VehicleType.electric,
-                  ),
-                  FSelectTile(
-                    title: const Text('Hybrid'),
-                    value: VehicleType.hybrid,
-                  ),
-                  FSelectTile(title: const Text('Gas'), value: VehicleType.gas),
-                ],
-              ),
+              // FSelectTileGroup(
+              //   groupController: controller,
+              //   label: const Text('Vehicle Type'),
+              //   description: const Text('Select your vehicle type.'),
+              //   validator:
+              //       (values) =>
+              //           values?.isEmpty ?? true
+              //               ? 'Please select a value.'
+              //               : null,
+              //   children: [
+              //     FSelectTile(
+              //       title: const Text('Electric'),
+              //       value: VehicleType.electric,
+              //     ),
+              //     FSelectTile(
+              //       title: const Text('Hybrid'),
+              //       value: VehicleType.hybrid,
+              //     ),
+              //     FSelectTile(title: const Text('Gas'), value: VehicleType.gas),
+              //   ],
+              // ),
               const SizedBox(height: 20),
               FSelectTileGroup(
                 groupController: opController,
@@ -239,7 +262,7 @@ class _StateSignupPage extends State<SignupPage> {
                             : null,
                 children: [
                   FSelectTile(
-                    title: const Text('Normal'),
+                    title: const Text('Fuel Efficient'),
                     value: OptimizationPriority.normal,
                   ),
                   FSelectTile(
@@ -257,9 +280,9 @@ class _StateSignupPage extends State<SignupPage> {
                     if (opController.value.contains(
                       OptimizationPriority.normal,
                     )) {
-                      optimization = "normal";
+                      optimization = "Fuel Efficient";
                     } else {
-                      optimization = "fst";
+                      optimization = "Fastest Route";
                     }
 
                     if (controller.value.contains(VehicleType.electric)) {
@@ -273,6 +296,8 @@ class _StateSignupPage extends State<SignupPage> {
                     final password = _passwordController.text;
                     final confirmPassword = _confirmPasswordController.text;
                     final email = _emailController.text;
+                    final firstname = _nameController.text;
+                    final lastname = _lastNameController.text;
 
                     final success = await Provider.of<AppProvider>(
                       context,
@@ -281,6 +306,9 @@ class _StateSignupPage extends State<SignupPage> {
                       password,
                       confirmPassword,
                       email,
+                      firstname,
+                      lastname,
+                      optimization
             
                     );
                     if (success) {

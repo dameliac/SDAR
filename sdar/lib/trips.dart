@@ -9,6 +9,7 @@ import 'package:sdar/frompage.dart';
 import 'package:sdar/planned_trips.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/topage.dart';
+import 'package:toastification/toastification.dart';
 
 class Trips extends StatefulWidget {
   const Trips({super.key});
@@ -582,8 +583,25 @@ class _StateTrips extends State<Trips> {
       
                         /// Optimise button
                         FButton(
-                          onPress: () {
-                            // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> PlannedTripsPage()));
+                          onPress: () async {
+                            //TODO save a trip now
+
+                           final success =  await app.saveTrip();
+                           if(success){
+                            toastification.show(
+                              title: Text('Trip Planned'),
+                              autoCloseDuration: Duration(seconds: 1),
+                              type: ToastificationType.success
+                            );
+                            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> PlannedTripsPage(origin: 'home',)));
+
+                           } else {
+                            toastification.show(
+                              title: Text('Failed to create trip'),
+                              autoCloseDuration: Duration(seconds: 1),
+                              type: ToastificationType.error
+                            );
+                           }
                           },
                           label: const Text('Save Trip'),
                         ),
