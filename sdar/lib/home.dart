@@ -119,6 +119,7 @@ class _StateHome extends State<Home> {
                       //SECOND TILE
                       GestureDetector(
                         onTap: () {
+                          Provider.of<AppProvider>(context,listen: false).getCommutes();
                           Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>CommutePage()));
                           // Add your navigation or logic here
                         },

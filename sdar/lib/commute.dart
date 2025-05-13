@@ -1,8 +1,10 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:provider/provider.dart';
 import 'package:sdar/AddCommute.dart';
 import 'package:sdar/EditCommute.dart';
+import 'package:sdar/app_provider.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 
@@ -35,75 +37,80 @@ class _StateCommutePage extends State<CommutePage>{
       borderRadius: BorderRadius.circular(5),
     );
     
-    //TEMPORARY DATA
-    final List<Map<String, dynamic>> commute = [
-      {
-        'startLoc':'Home',
-        'destination': 'Alligator Pond, St Elizabeth',
-        'date': 'Mon, Tue, Thu, Fri',
-        'time': '09:30 AM',
-        'notification':true
-      },
-      {
-        'startLoc':'Devon House',
-        'destination': '12 Windsor Avenue, Kingston',
-        'date': 'Mon, Tue, Fri',
-        'time': '02:45 PM',
-        'notification':true
-      },
-]   ;
 
-    return FScaffold(header:FHeader( title: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                onPressed: () {
-                  // Your onPressed logic here
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
-                },
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
+    return Consumer<AppProvider>(
+      builder: (context, value, child) => FScaffold(header:FHeader( title: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  onPressed: () {
+                    // Your onPressed logic here
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
+                  },
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                ),
               ),
-            ),
-            const Center(
-              child: Text(
-                "Commute Alerts",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black),
+              const Center(
+                child: Text(
+                  "Commute Alerts",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black,
+                  fontSize: 24
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          ),
+          footer: AppNavbar(index: 0),
+          content: Column(
+            children: [
+           
+             const SizedBox(height: 16),
+      
+        // Commute Cards
+        // ...commute.map((route) => CommuteCard(
+        //       startLoc: route['startLoc'],
+        //       destination: route['destination'],
+        //       days: route['date'],
+        //       time: route['time'],
+        //       Notification: route['notification'],
+        //     )),
+        SizedBox(
+          height: 200,
+          child: value.commutes.isEmpty?
+           Center(child: Text('No Commutes, but you can add one'),)
+          : ListView.builder(
+            itemCount: value.commutes.length,
+            itemBuilder: (context, index) {
+        final commute = value.commutes[index];
+        return CommuteCard(
+          startLoc: commute.startLoc,
+          destination: commute.destination,
+          days: commute.days.toString(),
+          time: commute.time,
+          Notification: commute.notification,
+        );
+      },
+            )
         ),
+            const SizedBox(height: 30),
+            FButton(onPress: (){
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> AddCommutePage()));
+            }, label: Text('Add Commute', style: TextStyle(fontWeight: FontWeight.bold),), style: 
+                  FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+                  disabledBoxDecoration: disabledBoxDecoration, 
+                  focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
+                  contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+                  disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+                  enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+                  iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+                  spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
+          ],),
         ),
-        footer: AppNavbar(index: 0),
-        content: Column(
-          children: [
-         
-           const SizedBox(height: 16),
-
-      // Commute Cards
-      ...commute.map((route) => CommuteCard(
-            startLoc: route['startLoc'],
-            destination: route['destination'],
-            days: route['date'],
-            time: route['time'],
-            Notification: route['notification'],
-          )),
-          const SizedBox(height: 30),
-          FButton(onPress: (){
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> AddCommutePage()));
-          }, label: Text('Add Commute', style: TextStyle(fontWeight: FontWeight.bold),), style: 
-                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
-                disabledBoxDecoration: disabledBoxDecoration, 
-                focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
-                contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
-                disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
-                enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
-                iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
-                spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
-        ],),
-      );
+    );
   }
 }
 

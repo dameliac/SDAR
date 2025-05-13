@@ -5,8 +5,11 @@ import 'package:pocketbase/pocketbase.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:sdar/commute.dart';
+import 'package:sdar/frompage.dart';
+import 'package:sdar/topage.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 import 'package:sdar/functions/CommuteService.dart';
+import 'package:toastification/toastification.dart';
 
 
 class AddCommutePage extends StatefulWidget {
@@ -76,157 +79,405 @@ class _StateAddCommutePage extends State<AddCommutePage>{
           ],
         ),),
       footer: AppNavbar(index: 0),
-      content:SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 40,),
-            Material(
-              color: Color.fromRGBO(243, 246, 243, 1),
-              borderRadius: BorderRadius.circular(5),
-              child:Container(
-                padding: EdgeInsets.all(5),
-                child: TextField(
-                    controller: _startLocationController,
-                      textAlign: TextAlign.left,
-                      decoration: InputDecoration(
-                      hintText: 'Enter a starting location',
-                      border: UnderlineInputBorder(borderSide: BorderSide.none)
-                    ),
-                 
-                ) ,
-              )
-            ),
-            const SizedBox(height: 20,),
-            Material(
-              color: Color.fromRGBO(243, 246, 243, 1),
-              borderRadius: BorderRadius.circular(5),
-              child:Container(
-                padding: EdgeInsets.all(5),
-                child: TextField(
-                  controller: _endLocationController,
-                      textAlign: TextAlign.left,
-                      decoration: InputDecoration(
-                      hintText: 'Enter your destination',
-                      border: UnderlineInputBorder(borderSide: BorderSide.none)
-                    ),
-                 
-                ) ,
-              )
-            ),
-            const SizedBox(height: 40,),
-            Material(
-              color: Color.fromRGBO(243, 246, 243, 1),
-              borderRadius: BorderRadius.circular(5),
-              child:Container(
-                padding: EdgeInsets.all(5),
-                child: Stack(
-                  alignment: Alignment.centerLeft,
-                  children: [
-                    const 
-                    Text('Turn Notifications On', style: TextStyle(fontSize: 14),),
-                    const SizedBox(height: 15,),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: 
-                      Switch(
-                        value: _RemindMe,
-                        activeColor: Colors.green[700],
-                        onChanged: (bool newValue) {
-                        setState(() {
-                        _RemindMe = newValue;
-                        });
-                        },
-                      ) 
-                    ),
-                  ],
-                ) ,
-              )
-            ),
-            const SizedBox(height: 15,),
-            Material(
-              color: Color.fromRGBO(243, 246, 243, 1),
-              borderRadius: BorderRadius.circular(5),
-              child:Container(
-                padding: EdgeInsets.all(5),
-                child: TextField(
-                    controller: _timeController,
-                      textAlign: TextAlign.left,
-                      decoration: InputDecoration(
-                      hintText: 'Tap to enter drop-off time',
-                      border: UnderlineInputBorder(borderSide: BorderSide.none)
-                    ),
-                    showCursor: false,
-                    onTap: () async {
-                    TimeOfDay? pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: TimeOfDay.now(),
-                      builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: ColorScheme.light(
-                            primary: const Color.fromRGBO(53, 124, 247, 1),        // Dial + OK button
-                            onPrimary: Colors.white,                                // Text on primary
-                            surface: Colors.white,                                  // Picker background
-                            onSurface: Colors.black,                                // Default text
-                            error: Colors.red,
-                          ),
-                          textButtonTheme: TextButtonThemeData(
-                            style: TextButton.styleFrom(
-                              foregroundColor: const Color.fromRGBO(53, 124, 247, 1), // Cancel button
+      content:Consumer<AppProvider>(
+        builder: (context, value, child) => SingleChildScrollView(
+          child: Column(
+            children: [
+              const SizedBox(height: 40,),
+              Material(
+                color: Color.fromRGBO(243, 246, 243, 1),
+                borderRadius: BorderRadius.circular(5),
+                child:Container(
+                  padding: EdgeInsets.all(5),
+                     child: FTextField(
+                          onTap: () {
+                      Provider.of<AppProvider>(context,listen:false).selectedFromLocation = null;
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=> const Frompage()));
+                          },
+                          onChange: (value) {
+                            print(value);
+                            //TODO add a location picker for the "From" field
+                          },
+                          readOnly: true,
+                          hint: value.selectedFromLocation == null? "" : value.selectedFromLocation!.name,
+                          controller: _startLocationController,
+                          clearable: (value) => value.text.isNotEmpty,
+                          enabled: true,
+                          label: const Text(
+                            'From:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                           ),
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.words,
+                          maxLines: 1,
+                          style: FTextFieldStyle.inherit(
+                            colorScheme: FColorScheme(
+                              brightness: Brightness.light, // Light theme
+                              barrier:
+                                  Colors
+                                      .transparent, // Transparent barrier color (usually for focus or overlay)
+                              background:
+                                  Colors
+                                      .white, // White background for the TextField
+                              foreground:
+                                  Colors
+                                      .black, // Text color (black for visibility)
+                              primary:
+                                  Colors.blue, // Primary color (blue for example)
+                              primaryForeground:
+                                  Colors
+                                      .white, // Text color for primary actions (white on blue)
+                              secondary:
+                                  Colors
+                                      .green, // Secondary color (green for example)
+                              secondaryForeground:
+                                  Colors
+                                      .white, // Text color for secondary actions (white on green)
+                              muted:
+                                  Colors
+                                      .grey, // Muted color for less important content
+                              mutedForeground:
+                                  Colors
+                                      .black, // Muted text color (black for visibility)
+                              destructive:
+                                  Colors
+                                      .red, // Destructive action color (red for example)
+                              destructiveForeground:
+                                  Colors
+                                      .white, // Text color for destructive actions (white on red)
+                              error: Colors.red, // Error color (red for example)
+                              errorForeground:
+                                  Colors
+                                      .white, // Text color for error (white on red)
+                              border:
+                                  Colors
+                                      .blueGrey, // Border color for the TextField (blue-grey for a subtle look)
+                            ),
+                            typography:
+                                FTypography(), // Default typography style for the text
+                            style: FStyle.inherit(
+                              colorScheme: FColorScheme(
+                                brightness: Brightness.light, // Light theme
+                                barrier:
+                                    Colors
+                                        .transparent, // Transparent barrier color (usually for focus or overlay)
+                                background:
+                                    Colors
+                                        .white, // White background for the TextField
+                                foreground:
+                                    Colors
+                                        .black, // Text color (black for visibility)
+                                primary:
+                                    Colors
+                                        .blue, // Primary color (blue for example)
+                                primaryForeground:
+                                    Colors
+                                        .white, // Text color for primary actions (white on blue)
+                                secondary:
+                                    Colors
+                                        .green, // Secondary color (green for example)
+                                secondaryForeground:
+                                    Colors
+                                        .white, // Text color for secondary actions (white on green)
+                                muted:
+                                    Colors
+                                        .grey, // Muted color for less important content
+                                mutedForeground:
+                                    Colors
+                                        .black, // Muted text color (black for visibility)
+                                destructive:
+                                    Colors
+                                        .red, // Destructive action color (red for example)
+                                destructiveForeground:
+                                    Colors
+                                        .white, // Text color for destructive actions (white on red)
+                                error:
+                                    Colors.red, // Error color (red for example)
+                                errorForeground:
+                                    Colors
+                                        .white, // Text color for error (white on red)
+                                border:
+                                    Colors
+                                        .blueGrey, // Border color for the TextField (blue-grey for a subtle look)
+                              ),
+                              typography: FTypography(),
+                            ), // Text style (standard size and weight)
+                          ),
                         ),
-                        child: child!,
+                  
+                )
+              ),
+              const SizedBox(height: 20,),
+              Material(
+                color: Color.fromRGBO(243, 246, 243, 1),
+                borderRadius: BorderRadius.circular(5),
+                child:Container(
+                  padding: EdgeInsets.all(5),
+                  child: FTextField(
+                          onTap: () {
+                      Provider.of<AppProvider>(context,listen:false).selectedToLocation = null;
+
+                          Navigator.push(context, MaterialPageRoute(builder: (context)=> const Topage()));
+                          },
+                          onChange: (value) {
+                            print(value);
+                            //TODO add a location picker for the "From" field
+                          },
+                          readOnly: true,
+                          hint: value.selectedToLocation == null? "" : value.selectedToLocation!.name,
+                          controller: _endLocationController,
+                          clearable: (value) => value.text.isNotEmpty,
+                          enabled: true,
+                          label: const Text(
+                            'To:',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                            ),
+                          ),
+                          keyboardType: TextInputType.text,
+                          textCapitalization: TextCapitalization.words,
+                          maxLines: 1,
+                          style: FTextFieldStyle.inherit(
+                            colorScheme: FColorScheme(
+                              brightness: Brightness.light, // Light theme
+                              barrier:
+                                  Colors
+                                      .transparent, // Transparent barrier color (usually for focus or overlay)
+                              background:
+                                  Colors
+                                      .white, // White background for the TextField
+                              foreground:
+                                  Colors
+                                      .black, // Text color (black for visibility)
+                              primary:
+                                  Colors.blue, // Primary color (blue for example)
+                              primaryForeground:
+                                  Colors
+                                      .white, // Text color for primary actions (white on blue)
+                              secondary:
+                                  Colors
+                                      .green, // Secondary color (green for example)
+                              secondaryForeground:
+                                  Colors
+                                      .white, // Text color for secondary actions (white on green)
+                              muted:
+                                  Colors
+                                      .grey, // Muted color for less important content
+                              mutedForeground:
+                                  Colors
+                                      .black, // Muted text color (black for visibility)
+                              destructive:
+                                  Colors
+                                      .red, // Destructive action color (red for example)
+                              destructiveForeground:
+                                  Colors
+                                      .white, // Text color for destructive actions (white on red)
+                              error: Colors.red, // Error color (red for example)
+                              errorForeground:
+                                  Colors
+                                      .white, // Text color for error (white on red)
+                              border:
+                                  Colors
+                                      .blueGrey, // Border color for the TextField (blue-grey for a subtle look)
+                            ),
+                            typography:
+                                FTypography(), // Default typography style for the text
+                            style: FStyle.inherit(
+                              colorScheme: FColorScheme(
+                                brightness: Brightness.light, // Light theme
+                                barrier:
+                                    Colors
+                                        .transparent, // Transparent barrier color (usually for focus or overlay)
+                                background:
+                                    Colors
+                                        .white, // White background for the TextField
+                                foreground:
+                                    Colors
+                                        .black, // Text color (black for visibility)
+                                primary:
+                                    Colors
+                                        .blue, // Primary color (blue for example)
+                                primaryForeground:
+                                    Colors
+                                        .white, // Text color for primary actions (white on blue)
+                                secondary:
+                                    Colors
+                                        .green, // Secondary color (green for example)
+                                secondaryForeground:
+                                    Colors
+                                        .white, // Text color for secondary actions (white on green)
+                                muted:
+                                    Colors
+                                        .grey, // Muted color for less important content
+                                mutedForeground:
+                                    Colors
+                                        .black, // Muted text color (black for visibility)
+                                destructive:
+                                    Colors
+                                        .red, // Destructive action color (red for example)
+                                destructiveForeground:
+                                    Colors
+                                        .white, // Text color for destructive actions (white on red)
+                                error:
+                                    Colors.red, // Error color (red for example)
+                                errorForeground:
+                                    Colors
+                                        .white, // Text color for error (white on red)
+                                border:
+                                    Colors
+                                        .blueGrey, // Border color for the TextField (blue-grey for a subtle look)
+                              ),
+                              typography: FTypography(),
+                            ), // Text style (standard size and weight)
+                          ),
+                        ),
+                )
+              ),
+              const SizedBox(height: 40,),
+              Material(
+                color: Color.fromRGBO(243, 246, 243, 1),
+                borderRadius: BorderRadius.circular(5),
+                child:Container(
+                  padding: EdgeInsets.all(5),
+                  child: Stack(
+                    alignment: Alignment.centerLeft,
+                    children: [
+                      const 
+                      Text('Turn Notifications On', style: TextStyle(fontSize: 14),),
+                      const SizedBox(height: 15,),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: 
+                        Switch(
+                          value: _RemindMe,
+                          activeColor: Colors.green[700],
+                          onChanged: (bool newValue) {
+                          setState(() {
+                          _RemindMe = newValue;
+                          });
+                          },
+                        ) 
+                      ),
+                    ],
+                  ) ,
+                )
+              ),
+              const SizedBox(height: 15,),
+              Material(
+                color: Color.fromRGBO(243, 246, 243, 1),
+                borderRadius: BorderRadius.circular(5),
+                child:Container(
+                  padding: EdgeInsets.all(5),
+                  child: TextField(
+                      controller: _timeController,
+                        textAlign: TextAlign.left,
+                        decoration: InputDecoration(
+                        hintText: 'Tap to enter drop-off time',
+                        border: UnderlineInputBorder(borderSide: BorderSide.none)
+                      ),
+                      showCursor: false,
+                      onTap: () async {
+                      TimeOfDay? pickedTime = await showTimePicker(
+                        context: context,
+                        initialTime: TimeOfDay.now(),
+                        builder: (context, child) {
+                        return Theme(
+                          data: Theme.of(context).copyWith(
+                            colorScheme: ColorScheme.light(
+                              primary: const Color.fromRGBO(53, 124, 247, 1),        // Dial + OK button
+                              onPrimary: Colors.white,                                // Text on primary
+                              surface: Colors.white,                                  // Picker background
+                              onSurface: Colors.black,                                // Default text
+                              error: Colors.red,
+                            ),
+                            textButtonTheme: TextButtonThemeData(
+                              style: TextButton.styleFrom(
+                                foregroundColor: const Color.fromRGBO(53, 124, 247, 1), // Cancel button
+                              ),
+                            ),
+                          ),
+                          child: child!,
+                        );
+                      },
                       );
+                      if (pickedTime != null) {
+                        _timeController.text = pickedTime.format(context);
+                      }
                     },
-                    );
-                    if (pickedTime != null) {
-                      _timeController.text = pickedTime.format(context);
-                    }
-                  },
-           
-                ) ,
-              )
-            ),
-            const SizedBox(height: 20,),
-            Align(alignment: Alignment.centerLeft,
-            child:Text('Select Commute Day/s', style: TextStyle(fontWeight: FontWeight.bold),),),
-            const SizedBox(height: 10,),
-            Material(
-              child: DaySelectorChips(onSelectionChanged: (List<bool>selection){
-                setState(() {
-                  _selectedDays=List.from(selection);
-                });
-              },)
-            ),
-             const SizedBox(height: 50,),
-            FButton(onPress: ()async{
-              final List<String> allDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
-              final List<String> selectedDays = [
-              for (int i = 0; i < allDays.length; i++)
-                if (_selectedDays[i]) allDays[i]
-            ];
-        
-              final commuteService = CommuteService();
-              await commuteService.saveCommute(
-                  start: _startLocationController.text,
-                  end: _endLocationController.text,
-                  days: selectedDays,
-                  arriveByTime: _timeController.text,
-                  remindMe: _RemindMe,
-                );
-        
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CommutePage()));
-            }, label: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),), style: 
-                  FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
-                  disabledBoxDecoration: disabledBoxDecoration, 
-                  focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
-                  contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
-                  disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
-                  enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
-                  iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
-                  spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
-          ],
+             
+                  ) ,
+                )
+              ),
+              const SizedBox(height: 20,),
+              Align(alignment: Alignment.centerLeft,
+              child:Text('Select Commute Day/s', style: TextStyle(fontWeight: FontWeight.bold),),),
+              const SizedBox(height: 10,),
+              Material(
+                child: DaySelectorChips(onSelectionChanged: (List<bool>selection){
+                  setState(() {
+                    _selectedDays=List.from(selection);
+                  });
+                },)
+              ),
+               const SizedBox(height: 50,),
+              FButton(onPress: ()async{
+final List<String> shortDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
+                final Map<String, String> dayMapping = {
+                  'Su': 'Sunday',
+                  'M': 'Monday',
+                  'Tu': 'Tuesday',
+                  'W': 'Wednesday',
+                  'Th': 'Thursday',
+                  'F': 'Friday',
+                  'Sa': 'Saturday',
+                };
+
+                
+                final List<String> allDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
+               final List<String> selectedFullDays = [];
+                for (int i = 0; i < shortDays.length; i++) {
+                  if (_selectedDays[i]) {
+                    // Add the full day name using the mapping
+                    selectedFullDays.add(dayMapping[shortDays[i]]!);
+                  }
+                }
+          
+                // final commuteService = CommuteService();
+                // await commuteService.saveCommute(
+                //     start: _startLocationController.text,
+                //     end: _endLocationController.text,
+                //     days: selectedDays,
+                //     arriveByTime: _timeController.text,
+                //     remindMe: _RemindMe,
+                //   );
+                
+                final success = await value.addCommute(_timeController.text, selectedFullDays);
+                if(success){
+                  toastification.show(
+                    title: Text('Created Alert'),
+                    autoCloseDuration: Duration(seconds: 2),
+                    type: ToastificationType.success
+                  );
+                }
+
+          
+                // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CommutePage()));
+              }, label: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),), style: 
+                    FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+                    disabledBoxDecoration: disabledBoxDecoration, 
+                    focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
+                    contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+                    disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+                    enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+                    iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+                    spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
+            ],
+          ),
         ),
       ))
       ;

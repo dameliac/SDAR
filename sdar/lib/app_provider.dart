@@ -5,6 +5,9 @@ import 'package:latlong2/latlong.dart';
 import 'package:pocketbase/pocketbase.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:dio/dio.dart';
+import 'dart:async';
+import 'package:intl/intl.dart';
+import 'package:toastification/toastification.dart';
 
 class SearchLocation {
   String name = "";
@@ -43,6 +46,15 @@ class Directions {
   double distance = 0.0;
 }
 
+class Commute {
+  String startLoc = "";
+        String destination = ""; 
+    String date = "";
+    List<dynamic> days = [];
+    String time = "";
+    bool notification = true;
+}
+
 
 class AppProvider extends ChangeNotifier {
   int index = 0;
@@ -63,12 +75,141 @@ class AppProvider extends ChangeNotifier {
   List<Trip> trips = [];
   List<Directions> tmp = [];
   List<TravelHistory> travelHistory = [];
+  List<Commute> commutes = [];
+  
   SearchLocation? selectedFromLocation;
   SearchLocation? selectedToLocation;
+  SearchLocation? selectedToC;
+  SearchLocation? selectedFromC;
 
   List<Map<String, dynamic>> estimate = [];
+Timer? _commuteCheckTimer;
+
+void stopCommuteChecks() {
+    if (_commuteCheckTimer != null && _commuteCheckTimer!.isActive) {
+      _commuteCheckTimer!.cancel();
+      print("Commute checks stopped.");
+    }
+    _commuteCheckTimer = null;
+  }
+
+  Future<void> getCommutes() async {
+    commutes.clear();
+      try {
+          final records = await pb.collection('Commute').getFullList(
+              filter: 'userID="${store.record!.id}"',
+            );
+
+          for(var record in records){
+            final start = record.getStringValue('start_location');
+            final end = record.getStringValue('end_location');
+            final arrival = record.getStringValue('arrival_time');
+            final days = record.getListValue('days');
+
+            commutes.add(Commute()..startLoc = start
+            ..destination = end
+            ..time = arrival
+            ..days = days
+            );
+
+          }
+
+          notifyListeners();
+      } catch(e){
+        print(e);
+      }
+  }
+
+  void startCommuteChecks() {
+    print("Started");
+    if (!isInitialized || !isLoggedIn || store.record == null) {
+      print("Commute checks cannot start: App not initialized, user not logged in, or user record is null.");
+      return;
+    }
+
+    final String currentUserID = store.record!.id;
+
+    if (_commuteCheckTimer != null && _commuteCheckTimer!.isActive) {
+      print("Commute checks already running for user $currentUserID.");
+      return; // Already running
+    }
+    
+    print("Starting commute checks for user $currentUserID...");
+    _commuteCheckTimer = Timer.periodic(const Duration(seconds: 60), (timer) async {
+      print("Going again");
+      if (!isLoggedIn || store.record == null) { // Re-check login status
+        print("User logged out or session expired. Stopping commute checks.");
+        stopCommuteChecks();
+        return;
+      }
+      try {
+        final records = await pb.collection('Commute').getFullList(
+              filter: 'userID="$currentUserID"',
+            );
+        // print(records);
+
+        DateTime now = DateTime.now();
+        String todayDayName = DateFormat('EEEE').format(now); // e.g., "Monday", "Tuesday"
+
+        for (var record in records) {
+          try {
+            List<String> commuteDays = [];
+            final dynamic daysValue = record.data['days']; // Access raw data
+            if (daysValue is List) {
+                commuteDays = List<String>.from(daysValue.map((item) => item.toString()));
+            }
 
 
+            // Check if the commute is scheduled for today
+            if (!commuteDays.contains(todayDayName)) {
+              // print('Commute ID ${record.id}: Not for today (${todayDayName}). Skipping.');
+              continue;
+            }
+
+            String arrivalTimeString = record.getStringValue('arrival_time'); // Expects "HH:mm"
+            double durationInSeconds = record.getDoubleValue('duration');
+
+
+            List<String> timeParts = arrivalTimeString.split(':');
+            if (timeParts.length != 2) {
+              print('Commute ID ${record.id}: Invalid arrival_time format: $arrivalTimeString. Skipping.');
+              continue;
+            }
+
+            int hour = int.parse(timeParts[0]);
+            int minute = int.parse(timeParts[1]);
+
+            DateTime scheduledArrivalTimeToday = DateTime(now.year, now.month, now.day, hour, minute);
+
+            // Time if user starts now and travels for 'durationInSeconds'
+            DateTime estimatedArrivalIfStartingNow = now.add(Duration(seconds: durationInSeconds.toInt()));
+
+            // print("$estimatedArrivalIfStartingNow , $scheduledArrivalTimeToday");
+            // Condition: scheduled_arrival_time >= (current_time + duration_from_record)
+            if (estimatedArrivalIfStartingNow.isAfter(scheduledArrivalTimeToday)) {
+              toastification.show(
+                title: Text('Leave Now To Make Trip'),
+                description: Text('To: ${record.getStringValue('end_location')}'),
+                autoCloseDuration: Duration(seconds: 2)
+              );
+              print('Commute ID ${record.id} (Scheduled: $arrivalTimeString, Duration: ${durationInSeconds}s, Day: $todayDayName): true');
+            } else {
+              // Optional: print false if needed for debugging
+              // print('Commute ID ${record.id} (Scheduled: $arrivalTimeString, Duration: ${durationInSeconds}s, Day: $todayDayName): false');
+            }
+          } catch (e) {
+            print('Error processing commute record ${record.id}: $e. Record data: ${record.data}');
+          }
+        }
+      } catch (e) {
+        print('Error fetching commutes: $e');
+        if (e is ClientException && (e.statusCode == 401 || e.statusCode == 403)) {
+            print("Authentication error during commute check. Stopping timer.");
+            stopCommuteChecks();
+        }
+      }
+    });
+  }
 
   Future<void> getEstimates () async{
 
@@ -180,8 +321,6 @@ final co2 = vehicle.getDoubleValue('co2');
 
         // print(ex);
         // print(route);
-        
-
          travelHistory.add(
             TravelHistory(
               start: start,
@@ -203,6 +342,29 @@ final co2 = vehicle.getDoubleValue('co2');
       print('Error fetching travel history: $e');
       travelHistory.clear();
     }
+  }
+
+  Future<bool> addCommute(time , day) async {
+
+    await getDistanceTime();
+
+      final body = <String, dynamic>{
+  "userID": store.record!.id,
+  "start_location":  selectedFromLocation!.name,
+  "end_location": selectedToLocation!.name,
+  "days": day,
+  "arrival_time": time,
+  "remind_me": true,
+  "duration" : duration
+};
+
+  try {
+final record = await pb.collection('Commute').create(body: body);
+return true;
+  } catch(e){
+  return false;
+
+  }
   }
 
   Future<void> getTrips() async {
@@ -231,8 +393,6 @@ final co2 = vehicle.getDoubleValue('co2');
         ..endCoord = [stop_lat,stop_lng]
         ..routeID = id
         ..duration = record.getDoubleValue('Duration');
-
-        print(trip.startCoord);
 
         trips.add(trip);
       }
@@ -418,6 +578,8 @@ return week1;
   }
 
   void logout() {
+            stopCommuteChecks();
+
     pb.authStore.clear();
     isLoggedIn = false;
     notifyListeners();
@@ -455,6 +617,7 @@ return week1;
 
 
   Future<bool> login(String username, String password) async {
+    print("Called on a reload");
     try {
       userdata = await pb
           .collection('users')
@@ -480,8 +643,9 @@ return week1;
     return false;
   }
 
-  // Add this method to your AppProvider class
   void clearAppData() {
+    stopCommuteChecks();
+
     // Reset index
     index = 0;
 
@@ -496,10 +660,28 @@ return week1;
 
     // Clear user data
     userdata = null;
+    driverName = null;
+    driverID = '';
+    userID = '';
+
+    // Clear search-related data
+    distance = 0.0;
+    duration = 0.0;
+    searchResults.clear();
+    selectedFromLocation = null;
+    selectedToLocation = null;
+    selectedToC = null;
+    selectedFromC = null;
+
+    // Clear lists
+    trips.clear();
+    tmp.clear();
+    travelHistory.clear();
+    commutes.clear();
+    estimate.clear();
 
     // Notify listeners of the changes
     notifyListeners();
-
     print("App data cleared successfully");
   }
 
@@ -517,6 +699,8 @@ return week1;
       pb = PocketBase('http://localhost:8090', authStore: store);
       isLoggedIn = store.isValid;
       isInitialized = true;
+    startCommuteChecks();
+
       notifyListeners();
       return true;
     } catch (e) {
