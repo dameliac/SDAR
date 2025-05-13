@@ -36,11 +36,11 @@ class _StateHome extends State<Home> {
                   children: [
                     Row(
                       children: [
-                        FIcon(FAssets.icons.mapPin),
-                        Text(
-                          "Current User Location",
-                          style: TextStyle(fontSize: 15),
-                        ),
+                        // FIcon(FAssets.icons.mapPin),
+                        // Text(
+                        //   "Current User Location",
+                        //   style: TextStyle(fontSize: 15),
+                        // ),
                       ],
                     ),
                     const SizedBox(height: 20),

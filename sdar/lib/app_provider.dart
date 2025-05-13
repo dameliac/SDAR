@@ -609,6 +609,7 @@ return success;
 
         // print(record);
         await loadDriverName();
+        startCommuteChecks();
         return true;
       }
     } catch (e) {

@@ -550,33 +550,33 @@ class _StateTrips extends State<Trips> {
                               ),
                             ),
                             const SizedBox(width: 10),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                color: const Color.fromRGBO(109, 217, 120, 1),
-                                borderRadius: BorderRadius.circular(32),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: const [
-                                  Icon(
-                                    Icons.co2,
-                                    color: Color.fromRGBO(4, 98, 28, 1),
-                                  ),
-                                  SizedBox(width: 6),
-                                  Text(
-                                    "20 g/km",
-                                    style: TextStyle(
-                                      color: Color.fromRGBO(4, 98, 28, 1),
-                                      fontWeight: FontWeight.w700,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
+                            // Container(
+                            //   padding: const EdgeInsets.symmetric(
+                            //     horizontal: 12,
+                            //     vertical: 6,
+                            //   ),
+                            //   decoration: BoxDecoration(
+                            //     color: const Color.fromRGBO(109, 217, 120, 1),
+                            //     borderRadius: BorderRadius.circular(32),
+                            //   ),
+                            //   child: Row(
+                            //     mainAxisSize: MainAxisSize.min,
+                            //     children: const [
+                            //       // Icon(
+                            //       //   Icons.co2,
+                            //       //   color: Color.fromRGBO(4, 98, 28, 1),
+                            //       // ),
+                            //       // SizedBox(width: 6),
+                            //       // Text(
+                            //       //   "20 g/km",
+                            //       //   style: TextStyle(
+                            //       //     color: Color.fromRGBO(4, 98, 28, 1),
+                            //       //     fontWeight: FontWeight.w700,
+                            //       //   ),
+                            //       // ),
+                            //     ],
+                            //   ),
+                            // ),
                           ],
                         ),
       

@@ -39,79 +39,98 @@ class _StateEstimatedTripPage extends State<EstimatedTripPage>{
 
 
      
-    //TEMPORARY DATA
-    final List<Map<String, dynamic>> estimate = [
-  {
-    'startLoc':'Home',
-    'destination': 'Alligator Pond, St Elizabeth',
-    'distance': 30.5,
-    'date': DateTime(2025,6,23),
-    'timelength': 1.5,
-    'Make': 'Toyota',
-    'Model': 'CR-V',
-    'Price': 143.4,
-    'Usage': '75 litres/100 km',
-    'cost':3217.50
-  },
-  {
-    'startLoc':'Devon House',
-    'destination': '12 Windsor Avenue, Kingston',
-   'distance': 38.90,
-    'date': DateTime(2025,6,23),
-    'timelength': 2.5,
-    'Make': 'Toyota',
-    'Model': 'CR-V',
-    'Price': 143.4,
-    'Usage': '75 litres/100 km',
-    'cost':3217.50
-  },
-];
+//     //TEMPORARY DATA
+//     final List<Map<String, dynamic>> appestimate = [
+//   {
+//     'startLoc':'Home',
+//     'destination': 'Alligator Pond, St Elizabeth',
+//     'distance': 30.5,
+//     'date': DateTime(2025,6,23),
+//     'timelength': 1.5,
+//     'Make': 'Toyota',
+//     'Model': 'CR-V',
+//     'Price': 143.4,
+//     'Usage': '75 litres/100 km',
+//     'cost':3217.50
+//   },
+//   {
+//     'startLoc':'Devon House',
+//     'destination': '12 Windsor Avenue, Kingston',
+//    'distance': 38.90,
+//     'date': DateTime(2025,6,23),
+//     'timelength': 2.5,
+//     'Make': 'Toyota',
+//     'Model': 'CR-V',
+//     'Price': 143.4,
+//     'Usage': '75 litres/100 km',
+//     'cost':3217.50
+//   },
+// ];
 
-    return FScaffold(header:FHeader( title: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                onPressed: () {
-                  // Your onPressed logic here
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
-                },
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
+    return Consumer<AppProvider>(
+      builder: (context, app, child) => FScaffold(header:FHeader( 
+        actions: [
+          FButton(onPress: () async{
+            await app.getEstimates();
+          }, label: Text('Sync')),
+        ],
+        title: Stack(
+            alignment: Alignment.center,
+            children: [
+              Align(
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  onPressed: () {
+                    // Your onPressed logic here
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
+                  },
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
+                ),
               ),
-            ),
-            const Center(
-              child: Text(
-                "Estimated Trip Costs",
-                textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.black),
+              const Center(
+                child: Text(
+                  "Estimated Trip Costs",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.black,
+                  fontSize: 24,
+                  ),
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+          ),
+          footer: AppNavbar(index: 0),
+          content: app.estimate.isEmpty
+            ? Center(
+                child: Text(
+                    'Please log in to see estimates.'),
+              )
+            : RefreshIndicator(
+                onRefresh: () => app.getEstimates(),
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16), // Optional: for breathing room
+                  itemCount: app.estimate.length,
+                  itemBuilder: (context, index) {
+                    final route = app.estimate[index];
+                    return EstimateCard(
+                      startLoc: route['startLoc'] ?? 'N/A',
+                      destination: route['destination'] ?? 'N/A',
+                      distance: (route['distance'] as num?)?.toDouble() ?? 0.0,
+                      timelength: (route['timelength'] as num?)?.toDouble() ?? 0.0,
+                      date: route['date'] is DateTime
+                          ? route['date']
+                          : DateTime.now(), // Handle if date is not DateTime
+                      Make: route['Make'] ?? 'N/A',
+                      Model: route['Model'] ?? 'N/A',
+                      Price: (route['Price'] as num?)?.toDouble() ?? 0.0,
+                      Usage: route['Usage'] ?? 'N/A',
+                      cost: (route['cost'] as num?)?.toDouble() ?? 0.0,
+                    );
+                  },
+                ),
+              ),
         ),
-        ),
-        footer: AppNavbar(index: 0),
-        content: SingleChildScrollView(
-  padding: const EdgeInsets.all(16), // Optional: for breathing room
-  child: Column(
-    children: [
-      const SizedBox(height: 16),
-      ...estimate.map((route) => EstimateCard(
-        startLoc: route['startLoc'],
-        destination: route['destination'],
-        distance: route['distance'],
-        timelength: route['timelength'],
-        date: route['date'],
-        Make: route['Make'],
-        Model: route['Model'],
-        Price: route['Price'],
-        Usage: route['Usage'],
-        cost: route['cost'],
-      )),
-    ],
-  ),
-),
-      );
+    );
   }
 }
 
@@ -273,33 +292,33 @@ class EstimateCard extends StatelessWidget{
             ],
           ),
           const SizedBox(height: 15),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: 
-          SizedBox(
-            width:80 ,
-            child: 
-           FButton(
-            onPress: (){
-            Navigator.push(context, MaterialPageRoute(builder: (context)=> EditEstimatedTripPage(tripData:{'startLoc': startLoc,
-            'destination': destination,
-            'date': date,
-            'Make': Make,
-            'Model': Model,
-            }
-            )));
-          }, label: Text('Edit',), 
-          style: 
-                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
-                disabledBoxDecoration: disabledBoxDecoration, 
-                focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
-                contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
-                disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
-                enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
-                iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
-                spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
-          )
-          )
+          // Align(
+          //   alignment: Alignment.bottomRight,
+          //   child: 
+          // SizedBox(
+          //   width:80 ,
+          //   child: 
+          //  FButton(
+          //   onPress: (){
+          //   Navigator.push(context, MaterialPageRoute(builder: (context)=> EditEstimatedTripPage(tripData:{'startLoc': startLoc,
+          //   'destination': destination,
+          //   'date': date,
+          //   'Make': Make,
+          //   'Model': Model,
+          //   }
+          //   )));
+          // }, label: Text('Edit',), 
+          // style: 
+          //       FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+          //       disabledBoxDecoration: disabledBoxDecoration, 
+          //       focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
+          //       contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+          //       disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+          //       enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+          //       iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+          //       spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
+          // )
+          // )
         ],
         
       ),
@@ -309,4 +328,3 @@ class EstimateCard extends StatelessWidget{
     );
   }
 }
-
