@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:forui/widgets/scaffold.dart';
+import 'package:provider/provider.dart';
+import 'package:sdar/app_provider.dart';
 import 'package:sdar/bar%20graph/bar_graph.dart';
 import 'package:sdar/bar%20graph/stackedbar_graph.dart';
+import 'package:sdar/home.dart';
 import 'package:sdar/line graph/line_graph.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:sdar/main.dart';
@@ -20,6 +23,14 @@ class _StateTravelTrendsPage extends State<TravelTrendsPage> {
   int selectedGraphIndex = 0;
   int selectedWeekIndex = 0; // Add a selected week index
   
+  // List week1 = [];
+  @override
+  void initState() {
+    // TODO: implement initState
+
+
+    super.initState();
+  }
   // Restructure data to include historical weeks (4 weeks per month, for 3 months)
   // Format: Vehicle -> Month -> Week -> Daily Trips (7 days per week)
   final Map<String, List<List<List<double>>>> vehicleModelCostsHistory = {
@@ -244,7 +255,7 @@ class _StateTravelTrendsPage extends State<TravelTrendsPage> {
       [
         // Week 1 - [Distance, Time] for each day of the week
         [
-          [8.5, 18.0], // Monday
+          [8.5, 100.0], // Monday
           [7.2, 15.0], // Tuesday
           [12.0, 22.0], // Wednesday
           [10.5, 20.0], // Thursday
@@ -370,6 +381,16 @@ class _StateTravelTrendsPage extends State<TravelTrendsPage> {
         ],
       ],
     ],
+
+
+
+
+
+
+
+
+
+
     'CR-V': [
       // Current month
       [
@@ -610,122 +631,130 @@ class _StateTravelTrendsPage extends State<TravelTrendsPage> {
       )
     ];
 
-    return FScaffold(
-      header: FHeader(
-        title: Stack(
-          alignment: Alignment.center,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                onPressed: () {
-                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'SDAR')));
-                },
-                icon: const Icon(Icons.arrow_back, color: Colors.black),
-              ),
-            ),
-            const Center(child: Text("Travel Trends")),
+    return Consumer<AppProvider>(
+      builder: (builder , app , child)=>FScaffold(
+        header: FHeader(
+          actions: [
+            FButton(onPress: () async{
+              await app.trends();
+            }, label: Text('Sync'))
           ],
-        ),
-      ),
-      footer: AppNavbar(index: 0),
-      content: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          title: Stack(
+            alignment: Alignment.center,
             children: [
-              // Vehicle model selection
               Align(
-                alignment: Alignment.centerRight,
-                child: 
-              ToggleButtons(
-                isSelected: vehicleModels.map((m) => m == selectedModel).toList(),
-                onPressed: (index) => setState(() => selectedModel = vehicleModels[index]),
-                children: vehicleModels.map((model) => Padding(padding: const EdgeInsets.all(8), child: Text(model))).toList(),
-              ),
-              ),
-              const SizedBox(height: 20),
-              
-              // Graph type selection
-              ToggleButtons(
-                isSelected: List.generate(3, (i) => i == selectedGraphIndex),
-                onPressed: (index) => setState(() => selectedGraphIndex = index),
-                children: const [
-                  Padding(padding: EdgeInsets.all(8), child: Text('Distance and Time')),
-                  Padding(padding: EdgeInsets.all(8), child: Text('Estimated Cost')),
-                  Padding(padding: EdgeInsets.all(8), child: Text('Consumption')),
-                ],
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Week navigation controls
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_back_ios),
-                    onPressed: previousWeek,
-                  ),
-                  Column(
-                    children: [
-                      Text(
-                        getMonthTitle(),
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      Text(
-                        getWeekTitle(selectedWeekIndex),
-                        style: const TextStyle(fontSize: 12),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_forward_ios),
-                    onPressed: nextWeek,
-                  ),
-                ],
-              ),
-              
-              const SizedBox(height: 20),
-              
-              // Graph display
-              AspectRatio(aspectRatio: 1.6, child: graphWidgets[selectedGraphIndex]),
-              
-              const SizedBox(height: 16),
-              
-              // Additional weekly summary
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "Weekly Summary",
-                        style: Theme.of(context).textTheme.titleLarge,
-                      ),
-                      const SizedBox(height: 8),
-                      _buildSummaryItem("Total Distance", 
-                        "${selectedSegments[0][0]} km", 
-                        Icons.straighten),
-                      _buildSummaryItem("Total Time", 
-                        "${selectedSegments[0][1]} min", 
-                        Icons.access_time),
-                      _buildSummaryItem("Cost", 
-                        "\$${selectedCost[0].toStringAsFixed(2)}", 
-                        Icons.attach_money),
-                      _buildSummaryItem(
-                        selectedModel == 'CR-V' ? "Energy Used" : "Fuel Used", 
-                        selectedModel == 'CR-V' 
-                          ? "${selectedFuel[0].toStringAsFixed(1)} kWh" 
-                          : "${selectedFuel[0].toStringAsFixed(1)} L", 
-                        selectedModel == 'CR-V' ? Icons.battery_charging_full : Icons.local_gas_station),
-                    ],
-                  ),
+                alignment: Alignment.centerLeft,
+                child: IconButton(
+                  onPressed: () {
+                    // Navigator.pop(context); //TODO chnage it back to replacement
+                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
+                  },
+                  icon: const Icon(Icons.arrow_back, color: Colors.black),
                 ),
               ),
+              const Center(child: Text("Travel Trends")),
             ],
+          ),
+        ),
+        footer: AppNavbar(index: 0),
+        content: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Vehicle model selection
+                Align(
+                  alignment: Alignment.centerRight,
+                  child: 
+                ToggleButtons(
+                  isSelected: vehicleModels.map((m) => m == selectedModel).toList(),
+                  onPressed: (index) => setState(() => selectedModel = vehicleModels[index]),
+                  children: vehicleModels.map((model) => Padding(padding: const EdgeInsets.all(8), child: Text(model))).toList(),
+                ),
+                ),
+                const SizedBox(height: 20),
+                
+                // Graph type selection
+                ToggleButtons(
+                  isSelected: List.generate(3, (i) => i == selectedGraphIndex),
+                  onPressed: (index) => setState(() => selectedGraphIndex = index),
+                  children: const [
+                    Padding(padding: EdgeInsets.all(8), child: Text('Distance and Time')),
+                    Padding(padding: EdgeInsets.all(8), child: Text('Estimated Cost')),
+                    Padding(padding: EdgeInsets.all(8), child: Text('Consumption')),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Week navigation controls
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.arrow_back_ios),
+                      onPressed: previousWeek,
+                    ),
+                    Column(
+                      children: [
+                        Text(
+                          getMonthTitle(),
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Text(
+                          getWeekTitle(selectedWeekIndex),
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ],
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.arrow_forward_ios),
+                      onPressed: nextWeek,
+                    ),
+                  ],
+                ),
+                
+                const SizedBox(height: 20),
+                
+                // Graph display
+                AspectRatio(aspectRatio: 1.6, child: graphWidgets[selectedGraphIndex]),
+                
+                const SizedBox(height: 16),
+                
+                // Additional weekly summary
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Weekly Summary",
+                          style: Theme.of(context).textTheme.titleLarge,
+                        ),
+                        const SizedBox(height: 8),
+                        _buildSummaryItem("Total Distance", 
+                          "${selectedSegments[0][0]} km", 
+                          Icons.straighten),
+                        _buildSummaryItem("Total Time", 
+                          "${selectedSegments[0][1]} min", 
+                          Icons.access_time),
+                        _buildSummaryItem("Cost", 
+                          "\$${selectedCost[0].toStringAsFixed(2)}", 
+                          Icons.attach_money),
+                        _buildSummaryItem(
+                          selectedModel == 'CR-V' ? "Energy Used" : "Fuel Used", 
+                          selectedModel == 'CR-V' 
+                            ? "${selectedFuel[0].toStringAsFixed(1)} kWh" 
+                            : "${selectedFuel[0].toStringAsFixed(1)} L", 
+                          selectedModel == 'CR-V' ? Icons.battery_charging_full : Icons.local_gas_station),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
