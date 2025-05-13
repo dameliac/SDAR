@@ -76,156 +76,158 @@ class _StateAddCommutePage extends State<AddCommutePage>{
           ],
         ),),
       footer: AppNavbar(index: 0),
-      content:Column(
-        children: [
-          const SizedBox(height: 40,),
-          Material(
-            color: Color.fromRGBO(243, 246, 243, 1),
-            borderRadius: BorderRadius.circular(5),
-            child:Container(
-              padding: EdgeInsets.all(5),
-              child: TextField(
-                  controller: _startLocationController,
-                    textAlign: TextAlign.left,
-                    decoration: InputDecoration(
-                    hintText: 'Enter a starting location',
-                    border: UnderlineInputBorder(borderSide: BorderSide.none)
-                  ),
-               
-              ) ,
-            )
-          ),
-          const SizedBox(height: 20,),
-          Material(
-            color: Color.fromRGBO(243, 246, 243, 1),
-            borderRadius: BorderRadius.circular(5),
-            child:Container(
-              padding: EdgeInsets.all(5),
-              child: TextField(
-                controller: _endLocationController,
-                    textAlign: TextAlign.left,
-                    decoration: InputDecoration(
-                    hintText: 'Enter your destination',
-                    border: UnderlineInputBorder(borderSide: BorderSide.none)
-                  ),
-               
-              ) ,
-            )
-          ),
-          const SizedBox(height: 40,),
-          Material(
-            color: Color.fromRGBO(243, 246, 243, 1),
-            borderRadius: BorderRadius.circular(5),
-            child:Container(
-              padding: EdgeInsets.all(5),
-              child: Stack(
-                alignment: Alignment.centerLeft,
-                children: [
-                  const 
-                  Text('Turn Notifications On', style: TextStyle(fontSize: 14),),
-                  const SizedBox(height: 15,),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: 
-                    Switch(
-                      value: _RemindMe,
-                      activeColor: Colors.green[700],
-                      onChanged: (bool newValue) {
-                      setState(() {
-                      _RemindMe = newValue;
-                      });
-                      },
-                    ) 
-                  ),
-                ],
-              ) ,
-            )
-          ),
-          const SizedBox(height: 15,),
-          Material(
-            color: Color.fromRGBO(243, 246, 243, 1),
-            borderRadius: BorderRadius.circular(5),
-            child:Container(
-              padding: EdgeInsets.all(5),
-              child: TextField(
-                  controller: _timeController,
-                    textAlign: TextAlign.left,
-                    decoration: InputDecoration(
-                    hintText: 'Tap to enter drop-off time',
-                    border: UnderlineInputBorder(borderSide: BorderSide.none)
-                  ),
-                  showCursor: false,
-                  onTap: () async {
-                  TimeOfDay? pickedTime = await showTimePicker(
-                    context: context,
-                    initialTime: TimeOfDay.now(),
-                    builder: (context, child) {
-                    return Theme(
-                      data: Theme.of(context).copyWith(
-                        colorScheme: ColorScheme.light(
-                          primary: const Color.fromRGBO(53, 124, 247, 1),        // Dial + OK button
-                          onPrimary: Colors.white,                                // Text on primary
-                          surface: Colors.white,                                  // Picker background
-                          onSurface: Colors.black,                                // Default text
-                          error: Colors.red,
-                        ),
-                        textButtonTheme: TextButtonThemeData(
-                          style: TextButton.styleFrom(
-                            foregroundColor: const Color.fromRGBO(53, 124, 247, 1), // Cancel button
+      content:SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 40,),
+            Material(
+              color: Color.fromRGBO(243, 246, 243, 1),
+              borderRadius: BorderRadius.circular(5),
+              child:Container(
+                padding: EdgeInsets.all(5),
+                child: TextField(
+                    controller: _startLocationController,
+                      textAlign: TextAlign.left,
+                      decoration: InputDecoration(
+                      hintText: 'Enter a starting location',
+                      border: UnderlineInputBorder(borderSide: BorderSide.none)
+                    ),
+                 
+                ) ,
+              )
+            ),
+            const SizedBox(height: 20,),
+            Material(
+              color: Color.fromRGBO(243, 246, 243, 1),
+              borderRadius: BorderRadius.circular(5),
+              child:Container(
+                padding: EdgeInsets.all(5),
+                child: TextField(
+                  controller: _endLocationController,
+                      textAlign: TextAlign.left,
+                      decoration: InputDecoration(
+                      hintText: 'Enter your destination',
+                      border: UnderlineInputBorder(borderSide: BorderSide.none)
+                    ),
+                 
+                ) ,
+              )
+            ),
+            const SizedBox(height: 40,),
+            Material(
+              color: Color.fromRGBO(243, 246, 243, 1),
+              borderRadius: BorderRadius.circular(5),
+              child:Container(
+                padding: EdgeInsets.all(5),
+                child: Stack(
+                  alignment: Alignment.centerLeft,
+                  children: [
+                    const 
+                    Text('Turn Notifications On', style: TextStyle(fontSize: 14),),
+                    const SizedBox(height: 15,),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: 
+                      Switch(
+                        value: _RemindMe,
+                        activeColor: Colors.green[700],
+                        onChanged: (bool newValue) {
+                        setState(() {
+                        _RemindMe = newValue;
+                        });
+                        },
+                      ) 
+                    ),
+                  ],
+                ) ,
+              )
+            ),
+            const SizedBox(height: 15,),
+            Material(
+              color: Color.fromRGBO(243, 246, 243, 1),
+              borderRadius: BorderRadius.circular(5),
+              child:Container(
+                padding: EdgeInsets.all(5),
+                child: TextField(
+                    controller: _timeController,
+                      textAlign: TextAlign.left,
+                      decoration: InputDecoration(
+                      hintText: 'Tap to enter drop-off time',
+                      border: UnderlineInputBorder(borderSide: BorderSide.none)
+                    ),
+                    showCursor: false,
+                    onTap: () async {
+                    TimeOfDay? pickedTime = await showTimePicker(
+                      context: context,
+                      initialTime: TimeOfDay.now(),
+                      builder: (context, child) {
+                      return Theme(
+                        data: Theme.of(context).copyWith(
+                          colorScheme: ColorScheme.light(
+                            primary: const Color.fromRGBO(53, 124, 247, 1),        // Dial + OK button
+                            onPrimary: Colors.white,                                // Text on primary
+                            surface: Colors.white,                                  // Picker background
+                            onSurface: Colors.black,                                // Default text
+                            error: Colors.red,
+                          ),
+                          textButtonTheme: TextButtonThemeData(
+                            style: TextButton.styleFrom(
+                              foregroundColor: const Color.fromRGBO(53, 124, 247, 1), // Cancel button
+                            ),
                           ),
                         ),
-                      ),
-                      child: child!,
+                        child: child!,
+                      );
+                    },
                     );
+                    if (pickedTime != null) {
+                      _timeController.text = pickedTime.format(context);
+                    }
                   },
-                  );
-                  if (pickedTime != null) {
-                    _timeController.text = pickedTime.format(context);
-                  }
-                },
-         
-              ) ,
-            )
-          ),
-          const SizedBox(height: 20,),
-          Align(alignment: Alignment.centerLeft,
-          child:Text('Select Commute Day/s', style: TextStyle(fontWeight: FontWeight.bold),),),
-          const SizedBox(height: 10,),
-          Material(
-            child: DaySelectorChips(onSelectionChanged: (List<bool>selection){
-              setState(() {
-                _selectedDays=List.from(selection);
-              });
-            },)
-          ),
-           const SizedBox(height: 50,),
-          FButton(onPress: ()async{
-            final List<String> allDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
-            final List<String> selectedDays = [
-            for (int i = 0; i < allDays.length; i++)
-              if (_selectedDays[i]) allDays[i]
-          ];
-
-            final commuteService = CommuteService();
-            await commuteService.saveCommute(
-                start: _startLocationController.text,
-                end: _endLocationController.text,
-                days: selectedDays,
-                arriveByTime: _timeController.text,
-                remindMe: _RemindMe,
-              );
-
-            Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CommutePage()));
-          }, label: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),), style: 
-                FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
-                disabledBoxDecoration: disabledBoxDecoration, 
-                focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
-                contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
-                disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
-                enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
-                iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
-                spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
-        ],
+           
+                ) ,
+              )
+            ),
+            const SizedBox(height: 20,),
+            Align(alignment: Alignment.centerLeft,
+            child:Text('Select Commute Day/s', style: TextStyle(fontWeight: FontWeight.bold),),),
+            const SizedBox(height: 10,),
+            Material(
+              child: DaySelectorChips(onSelectionChanged: (List<bool>selection){
+                setState(() {
+                  _selectedDays=List.from(selection);
+                });
+              },)
+            ),
+             const SizedBox(height: 50,),
+            FButton(onPress: ()async{
+              final List<String> allDays = ['Su', 'M', 'Tu', 'W', 'Th', 'F', 'Sa'];
+              final List<String> selectedDays = [
+              for (int i = 0; i < allDays.length; i++)
+                if (_selectedDays[i]) allDays[i]
+            ];
+        
+              final commuteService = CommuteService();
+              await commuteService.saveCommute(
+                  start: _startLocationController.text,
+                  end: _endLocationController.text,
+                  days: selectedDays,
+                  arriveByTime: _timeController.text,
+                  remindMe: _RemindMe,
+                );
+        
+              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=> CommutePage()));
+            }, label: Text('Save', style: TextStyle(fontWeight: FontWeight.bold),), style: 
+                  FButtonStyle(enabledBoxDecoration: enabledBoxDecoration, enabledHoverBoxDecoration: enabledHoverBoxDecoration, 
+                  disabledBoxDecoration: disabledBoxDecoration, 
+                  focusedOutlineStyle: FFocusedOutlineStyle(color:const Color.fromRGBO(53, 124, 247, 1) , borderRadius: BorderRadius.circular(5)), 
+                  contentStyle: FButtonContentStyle(enabledTextStyle: TextStyle(color: Colors.white), 
+                  disabledTextStyle:TextStyle(color: const Color.fromARGB(255, 154, 154, 154)), 
+                  enabledIconColor: Colors.white, disabledIconColor:const Color.fromARGB(255, 154, 154, 154) ), 
+                  iconContentStyle: FButtonIconContentStyle(enabledColor: Colors.white, disabledColor: const Color.fromARGB(255, 154, 154, 154)), 
+                  spinnerStyle: FButtonSpinnerStyle(enabledSpinnerColor: Colors.white, disabledSpinnerColor: Color.fromARGB(255, 154, 154, 154))))
+          ],
+        ),
       ))
       ;
   }}
