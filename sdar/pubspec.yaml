@@ -44,6 +44,16 @@ dependencies:
   flutter_map: ^8.1.1
   latlong2: ^0.9.1
   dio: ^5.8.0+1
+  fl_chart: ^1.0.0
+  syncfusion_flutter_charts: ^24.1.0
+  image_picker: ^1.0.7
+  http: ^1.1.0
+  geolocator: ^14.0.0
+  flutter_local_notifications: ^14.1.1
+  timezone: ^0.9.1
+  flutter_typeahead: ^4.1.1
+  xml: ^6.3.0
+
 
 
 dev_dependencies:

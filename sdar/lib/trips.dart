@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:sdar/frompage.dart';
 import 'package:sdar/planned_trips.dart';
+import 'package:sdar/widgets/appNavBar.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/topage.dart';
 import 'package:toastification/toastification.dart';

@@ -48,11 +48,12 @@ class AppProvider extends ChangeNotifier {
   int index = 0;
   final dio = Dio();
   late PocketBase pb;
-  late RecordAuth? userdata;
+  RecordAuth? userdata;
   late AuthStore store;
   bool isLoggedIn = false;
   bool isInitialized = false;
   String? driverName;
+  
   String userID = "";
   double distance = 0.0;
   double duration = 0.0;
@@ -356,6 +357,8 @@ return success;
       return null;
     }
   }
+    
+
 
   Future<bool> login(String username, String password) async {
     try {
@@ -589,4 +592,7 @@ return "";
       return false;
     }
   }
+  
+
+
 }

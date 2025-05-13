@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
+import 'package:sdar/EcoTips.dart';
+import 'package:sdar/NearbyTravelSerivces.dart';
 import 'package:sdar/app_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:sdar/commute.dart';
 import 'package:sdar/estimated_trip.dart';
 import 'package:sdar/planned_trips.dart';
+import 'package:sdar/travel_trends.dart';
+import 'package:sdar/trips.dart';
 
 class Home extends StatefulWidget {
   const Home({super.key});
@@ -63,9 +67,8 @@ class _StateHome extends State<Home> {
                                   hintText: 'Plan Trips...',
                                   border: InputBorder.none,
                                 ),
-                                onChanged: (value) {
-                                  // Perform search logic
-                                  //direct to trips screen
+                                onTap: () {
+                                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Trips()));
                                 },
                               ),
                             ),
@@ -139,7 +142,7 @@ class _StateHome extends State<Home> {
                       //THIRD TILE
                       GestureDetector(
                         onTap: () {
-                          //Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>PlannedTripsPage(origin: 'home')));
+                          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>TravelTrendsPage()));
                           // Add your navigation or logic here
                         },
                         child:
@@ -251,11 +254,13 @@ class _StateHome extends State<Home> {
                       semanticLabel: 'Label',
                       enabled: true,
                       onPress: () {
-                        app.setIndex(3);
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>NearbyStationsMap()));
                         
                       },
                       onLongPress: () {},
                     ),
+
+                    
                     const SizedBox(height: 10),
 
                     FTile(
@@ -266,33 +271,38 @@ class _StateHome extends State<Home> {
                       suffixIcon: FIcon(FAssets.icons.chevronRight),
                       semanticLabel: 'Label',
                       enabled: true,
-                      onPress: () {},
+                      onPress: () {
+                        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>Tips()));
+                      },
                       onLongPress: () {},
                     ),
-                    const SizedBox(height: 10),
-                    FTile(
-                      prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
-                      title: const Text('Report Hazards'),
-                      // subtitle: const Text('subtitle'),
-                      // details: const Text('Set'),
-                      suffixIcon: FIcon(FAssets.icons.chevronRight),
-                      semanticLabel: 'Label',
-                      enabled: true,
-                      onPress: () {},
-                      onLongPress: () {},
-                    ),
-                    const SizedBox(height: 10),
-                    FTile(
-                      prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
-                      title: const Text('Alternative Route'),
-                      // subtitle: const Text('subtitle'),
-                      // details: const Text('Set'),
-                      suffixIcon: FIcon(FAssets.icons.chevronRight),
-                      semanticLabel: 'Label',
-                      enabled: true,
-                      onPress: () {},
-                      onLongPress: () {},
-                    ),
+                    
+                    
+                    //FAILED TO IMPLEMENT FEATURES
+                    // const SizedBox(height: 10),
+                    // FTile(
+                    //   prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
+                    //   title: const Text('Report Hazards'),
+                    //   // subtitle: const Text('subtitle'),
+                    //   // details: const Text('Set'),
+                    //   suffixIcon: FIcon(FAssets.icons.chevronRight),
+                    //   semanticLabel: 'Label',
+                    //   enabled: true,
+                    //   onPress: () {},
+                    //   onLongPress: () {},
+                    // ),
+                    // const SizedBox(height: 10),
+                    // FTile(
+                    //   prefixIcon: FIcon(FAssets.icons.star, color: const Color.fromARGB(255, 217, 217, 217)),
+                    //   title: const Text('Alternative Route'),
+                    //   // subtitle: const Text('subtitle'),
+                    //   // details: const Text('Set'),
+                    //   suffixIcon: FIcon(FAssets.icons.chevronRight),
+                    //   semanticLabel: 'Label',
+                    //   enabled: true,
+                    //   onPress: () {},
+                    //   onLongPress: () {},
+                    // ),
                     const SizedBox(height: 10),
                   ],
                 ),

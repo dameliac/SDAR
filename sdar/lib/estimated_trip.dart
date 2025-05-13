@@ -6,6 +6,11 @@ import 'package:sdar/AddCommute.dart';
 import 'package:sdar/EditEstimateTrip.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/widgets/appNavBar.dart';
+import 'package:sdar/app_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:pocketbase/pocketbase.dart';
+import 'package:http/http.dart';
+import 'package:xml/xml.dart';
 
 class EstimatedTripPage extends StatefulWidget {
   
@@ -21,6 +26,18 @@ class _StateEstimatedTripPage extends State<EstimatedTripPage>{
   @override
 
   Widget build(BuildContext context){
+    final String startLoc;
+    final String destination;
+    final double avgGasPrice = 127.0512;
+    final DateTime date;
+    final String duration;
+    final String make;
+    final String model;
+    final String usage; //fuel or ev usage
+    final double cost;
+    final double EVchargePrice = 90;
+
+
      
     //TEMPORARY DATA
     final List<Map<String, dynamic>> estimate = [

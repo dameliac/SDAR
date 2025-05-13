@@ -11,8 +11,11 @@ import 'package:sdar/trips.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() {
+  tz.initializeTimeZones();
   runApp(ChangeNotifierProvider(
       create: (context) => AppProvider(),
       child: MyApp(),
