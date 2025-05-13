@@ -27,7 +27,6 @@ class _StateMessages extends State<Messages> {
 void initState() {
   super.initState();
   WidgetsBinding.instance.addPostFrameCallback((_) {
-    
     final appProvider = Provider.of<AppProvider>(context, listen: false);
     pb = appProvider.pb;
     fetchUserNotifications();
@@ -36,8 +35,6 @@ void initState() {
 
 
   Future<void> fetchUserNotifications() async {
-
-    // notifications.clear();
     try {
      final appProvider = Provider.of<AppProvider>(context, listen: false);
      final userId = appProvider.userdata?.record.id; // Get current user ID

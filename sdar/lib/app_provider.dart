@@ -448,9 +448,7 @@ return success;
   }
 
   Future<void> getSearchOptions(String value) async {
-
     searchResults.clear();
-
     final response = await dio.get('http://localhost:9002/autocomplete/$value');
     // print(response.data["data"]);
     for (var data in response.data["data"]) {
@@ -480,28 +478,6 @@ return success;
     duration = response.data['data']['duration'];
 
     notifyListeners();
-  }
-
-
-  Future<List> trends() async {
-    //TODO get a list of distance and time
-    var week1  = [];
-
-
-    final records = await pb.collection('Route').getFullList(
-  // sort: '-someField',
-);
-
-print(records);
-for (var record in records){
-    final distance= record.getDoubleValue('Distance');
-    final time = record.getDoubleValue('Duration');
-    week1.add([distance,time]);
-
-}
-
-return week1;
-
   }
 
    Future <List<LatLng>> getPolyline(start, end) async {

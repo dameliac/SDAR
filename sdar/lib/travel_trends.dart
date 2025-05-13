@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:forui/forui.dart';
 import 'package:forui/widgets/scaffold.dart';
-import 'package:provider/provider.dart';
-import 'package:sdar/app_provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:pocketbase/pocketbase.dart';
 import 'package:sdar/bar%20graph/bar_graph.dart';
 import 'package:sdar/bar%20graph/stackedbar_graph.dart';
-import 'package:sdar/home.dart';
 import 'package:sdar/line graph/line_graph.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:sdar/main.dart';
 import 'package:sdar/widgets/appNavBar.dart';
 import 'package:intl/intl.dart';
+import 'package:sdar/app_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:xml/xml.dart';
 
+//IMPROVED USING CLAUDE AI
 class TravelTrendsPage extends StatefulWidget {
   const TravelTrendsPage({super.key});
 
@@ -21,760 +24,502 @@ class TravelTrendsPage extends StatefulWidget {
 
 class _StateTravelTrendsPage extends State<TravelTrendsPage> {
   int selectedGraphIndex = 0;
-  int selectedWeekIndex = 0; // Add a selected week index
+  int selectedWeekIndex = 0;
   
-  // List week1 = [];
+  List<String> routeIDs = [];
+  List<double> distances = [];
+  List<double> durations = [];
+  List<DateTime> executionDates = [];
+  List<double> fuelConsumptions = [];
+  List<double> evConsumptions = [];
+  List<List<double>> distanceTime = [];
+  List<double> totalCosts = [];
+  
+  // Constants
+  final double avgGasPrice = 127.0512;
+  final double evPrice = 90.0;
+  
+  // Vehicle info
+  List<Map<String, dynamic>> vehicles = [];
+  double? combE;
+  double chargeTime120 = 0.0;
+  double chargeTime240 = 0.0;
+  bool isElectricVehicle = false;
+  
+  // Weekly data
+  List<Map<String, dynamic>> weeklyData = [];
+  List<String> weekLabels = [];
+  bool isLoading = true;
+  bool hasData = false;
+
   @override
   void initState() {
-    // TODO: implement initState
-
-
     super.initState();
-  }
-  // Restructure data to include historical weeks (4 weeks per month, for 3 months)
-  // Format: Vehicle -> Month -> Week -> Daily Trips (7 days per week)
-  final Map<String, List<List<List<double>>>> vehicleModelCostsHistory = {
-    'Prius': [
-      // Current month
-      [
-        // Week 1 - Multiple trips per day (7 days)
-        [245.5, 182.0, 310.5, 275.0, 295.5, 225.0, 164.0],
-        // Week 2
-        [128.5, 98.0, 115.5, 105.0, 132.5, 89.0, 84.0],
-        // Week 3
-        [220.0, 245.5, 212.0, 310.5, 278.0, 225.0, 224.0],
-        // Week 4
-        [82.5, 95.0, 112.0, 88.0, 105.0, 90.0, 75.0],
-      ],
-      // Last month
-      [
-        // Week 1
-        [210.0, 175.0, 285.0, 260.0, 270.0, 180.0, 170.0],
-        // Week 2
-        [120.5, 108.0, 125.0, 115.0, 142.0, 110.0, 105.0],
-        // Week 3
-        [198.0, 215.0, 190.0, 280.0, 245.0, 165.0, 97.0],
-        // Week 4
-        [95.0, 115.0, 132.0, 98.0, 120.0, 105.0, 110.0],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [175.0, 150.0, 210.0, 225.0, 180.0, 160.0, 100.0],
-        // Week 2
-        [140.0, 95.0, 138.5, 120.0, 153.0, 132.0, 112.0],
-        // Week 3
-        [222.0, 235.0, 208.0, 315.0, 245.0, 175.0, 110.0],
-        // Week 4
-        [88.0, 102.0, 124.0, 92.0, 115.0, 85.0, 89.0],
-      ],
-    ],
-    'CR-V': [
-      // Current month
-      [
-        // Week 1
-        [115.0, 98.0, 125.0, 142.0, 105.0, 120.0, 100.0],
-        // Week 2
-        [310.0, 280.0, 345.0, 392.5, 315.0, 275.0, 200.0],
-        // Week 3
-        [52.5, 48.0, 55.0, 62.0, 50.0, 45.0, 55.0],
-        // Week 4
-        [275.0, 262.0, 310.0, 345.0, 298.0, 245.0, 190.0],
-      ],
-      // Last month
-      [
-        // Week 1
-        [105.0, 92.0, 118.0, 135.0, 98.0, 112.0, 90.0],
-        // Week 2
-        [290.0, 265.0, 320.0, 380.0, 305.0, 250.0, 170.0],
-        // Week 3
-        [65.0, 55.0, 62.0, 75.0, 58.0, 50.0, 60.0],
-        // Week 4
-        [255.0, 242.0, 290.0, 325.0, 280.0, 208.0, 150.0],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [120.0, 105.0, 132.0, 148.0, 110.0, 125.0, 85.0],
-        // Week 2
-        [298.0, 275.0, 335.0, 402.0, 310.0, 260.0, 170.0],
-        // Week 3
-        [58.0, 52.0, 59.0, 68.0, 55.0, 48.0, 55.0],
-        // Week 4
-        [268.0, 255.0, 302.0, 340.0, 292.0, 228.0, 165.0],
-      ],
-    ],
-    'Probox': [
-      // Current month
-      [
-        // Week 1
-        [290.0, 275.0, 320.0, 345.0, 295.0, 270.0, 200.0],
-        // Week 2
-        [75.0, 68.0, 82.5, 95.0, 72.0, 60.0, 55.0],
-        // Week 3
-        [190.0, 175.0, 210.0, 230.0, 195.0, 170.0, 130.0],
-        // Week 4
-        [125.0, 118.0, 146.0, 158.0, 132.0, 110.0, 86.0],
-      ],
-      // Last month
-      [
-        // Week 1
-        [270.0, 255.0, 298.0, 325.0, 285.0, 250.0, 167.0],
-        // Week 2
-        [80.0, 74.0, 88.0, 102.0, 78.0, 66.0, 62.0],
-        // Week 3
-        [205.0, 190.0, 225.0, 245.0, 210.0, 175.0, 170.0],
-        // Week 4
-        [135.0, 128.0, 156.0, 168.0, 138.0, 105.0, 85.0],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [280.0, 265.0, 310.0, 338.0, 290.0, 260.0, 177.0],
-        // Week 2
-        [78.0, 70.0, 85.0, 98.0, 75.0, 64.0, 60.0],
-        // Week 3
-        [198.0, 182.0, 215.0, 235.0, 205.0, 180.0, 165.0],
-        // Week 4
-        [130.0, 122.0, 152.0, 162.0, 135.0, 108.0, 86.0],
-      ],
-    ],
-  };
-
-  final Map<String, List<List<List<double>>>> vehicleModelFuelHistory = {
-    'Prius': [
-      // Current month
-      [
-        // Week 1 (7 days)
-        [1.2, 1.0, 1.4, 1.3, 1.2, 1.1, 0.9], 
-        // Week 2
-        [1.3, 1.1, 1.5, 1.2, 1.3, 1.2, 1.2],
-        // Week 3
-        [1.1, 1.3, 1.2, 1.4, 1.3, 0.9, 0.8],
-        // Week 4
-        [1.2, 1.0, 1.3, 1.2, 1.3, 1.1, 1.1],
-      ],
-      // Last month
-      [
-        // Week 1
-        [1.1, 0.9, 1.3, 1.2, 1.2, 1.0, 1.1],
-        // Week 2
-        [1.2, 1.1, 1.4, 1.3, 1.2, 1.2, 1.1],
-        // Week 3
-        [1.0, 1.2, 1.1, 1.3, 1.2, 1.0, 0.9],
-        // Week 4
-        [1.1, 1.0, 1.2, 1.3, 1.2, 1.1, 1.1],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [1.0, 0.9, 1.2, 1.2, 1.1, 1.0, 1.1],
-        // Week 2
-        [1.2, 1.0, 1.3, 1.2, 1.3, 1.1, 1.2],
-        // Week 3
-        [1.1, 1.2, 1.0, 1.3, 1.2, 1.0, 1.1],
-        // Week 4
-        [1.1, 0.9, 1.2, 1.2, 1.1, 1.1, 1.1],
-      ],
-    ],
-    'CR-V': [
-      // Current month
-      [
-        // Week 1
-        [0.6, 0.5, 0.7, 0.6, 0.6, 0.7, 0.5],
-        // Week 2
-        [0.8, 0.7, 0.8, 0.7, 0.8, 0.7, 0.6],
-        // Week 3
-        [0.5, 0.6, 0.5, 0.7, 0.6, 0.5, 0.4],
-        // Week 4
-        [0.9, 0.8, 1.0, 0.9, 0.8, 0.9, 0.7],
-      ],
-      // Last month
-      [
-        // Week 1
-        [0.5, 0.5, 0.6, 0.6, 0.5, 0.7, 0.6],
-        // Week 2
-        [0.7, 0.6, 0.7, 0.8, 0.7, 0.7, 0.6],
-        // Week 3
-        [0.5, 0.4, 0.6, 0.5, 0.6, 0.5, 0.4],
-        // Week 4
-        [0.8, 0.7, 0.9, 0.8, 0.8, 0.9, 0.8],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [0.6, 0.5, 0.7, 0.7, 0.6, 0.6, 0.6],
-        // Week 2
-        [0.7, 0.8, 0.7, 0.7, 0.8, 0.7, 0.6],
-        // Week 3
-        [0.5, 0.5, 0.6, 0.6, 0.5, 0.5, 0.5],
-        // Week 4
-        [0.8, 0.8, 0.9, 0.9, 0.8, 0.8, 0.8],
-      ],
-    ],
-    'Probox': [
-      // Current month
-      [
-        // Week 1
-        [1.8, 1.6, 1.9, 1.7, 1.8, 1.6, 1.6],
-        // Week 2
-        [1.5, 1.3, 1.6, 1.5, 1.6, 1.5, 1.5],
-        // Week 3
-        [2.0, 1.8, 2.1, 1.9, 2.0, 1.8, 1.6],
-        // Week 4
-        [1.7, 1.5, 1.8, 1.7, 1.7, 1.6, 1.7],
-      ],
-      // Last month
-      [
-        // Week 1
-        [1.7, 1.5, 1.8, 1.6, 1.7, 1.5, 1.9],
-        // Week 2
-        [1.4, 1.3, 1.5, 1.4, 1.5, 1.6, 1.5],
-        // Week 3
-        [1.9, 1.7, 2.0, 1.8, 1.9, 1.7, 1.8],
-        // Week 4
-        [1.6, 1.5, 1.7, 1.6, 1.7, 1.5, 1.8],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [1.8, 1.6, 1.9, 1.7, 1.8, 1.6, 1.5],
-        // Week 2
-        [1.5, 1.4, 1.6, 1.5, 1.5, 1.5, 1.4],
-        // Week 3
-        [2.0, 1.8, 2.1, 1.9, 2.0, 1.7, 1.5],
-        // Week 4
-        [1.7, 1.6, 1.8, 1.7, 1.7, 1.5, 1.5],
-      ],
-    ],
-  };
-
-  final Map<String, List<List<List<List<double>>>>> vehicleModelSegmentsHistory = {
-    'Prius': [
-      // Current month
-      [
-        // Week 1 - [Distance, Time] for each day of the week
-        [
-          [8.5, 100.0], // Monday
-          [7.2, 15.0], // Tuesday
-          [12.0, 22.0], // Wednesday
-          [10.5, 20.0], // Thursday
-          [11.0, 21.0], // Friday
-          [9.0, 16.0], // Saturday
-          [6.5, 12.0], // Sunday
-        ],
-        // Week 2
-        [
-          [5.0, 10.0],
-          [4.0, 8.0],
-          [4.5, 9.0],
-          [4.2, 8.5],
-          [5.5, 11.0],
-          [3.5, 7.0],
-          [3.3, 6.5],
-        ],
-        // Week 3
-        [
-          [9.0, 17.0],
-          [10.0, 19.0],
-          [8.5, 16.0],
-          [12.5, 24.0],
-          [11.0, 21.0],
-          [9.0, 17.0],
-          [8.0, 15.0],
-        ],
-        // Week 4
-        [
-          [3.0, 6.0],
-          [3.5, 7.0],
-          [4.5, 9.0],
-          [3.2, 6.5],
-          [4.0, 8.0],
-          [3.3, 6.5],
-          [2.5, 5.0],
-        ],
-      ],
-      // Last month
-      [
-        // Week 1
-        [
-          [8.0, 16.0],
-          [6.5, 13.0],
-          [11.0, 20.0],
-          [10.0, 19.0],
-          [10.5, 20.0],
-          [7.0, 14.0],
-          [6.8, 13.5],
-        ],
-        // Week 2
-        [
-          [4.8, 9.5],
-          [4.2, 8.5],
-          [5.0, 10.0],
-          [4.5, 9.0],
-          [5.8, 11.5],
-          [4.5, 9.0],
-          [4.2, 8.5],
-        ],
-        // Week 3
-        [
-          [8.0, 15.0],
-          [8.5, 16.0],
-          [7.5, 14.0],
-          [11.0, 21.0],
-          [9.8, 19.0],
-          [6.5, 13.0],
-          [3.8, 7.5],
-        ],
-        // Week 4
-        [
-          [3.5, 7.0],
-          [4.2, 8.5],
-          [5.0, 10.0],
-          [3.6, 7.2],
-          [4.5, 9.0],
-          [4.0, 8.0],
-          [4.2, 8.5],
-        ],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [
-          [7.0, 14.0],
-          [6.0, 12.0],
-          [8.5, 17.0],
-          [9.0, 18.0],
-          [7.2, 14.5],
-          [6.5, 13.0],
-          [4.0, 8.0],
-        ],
-        // Week 2
-        [
-          [5.5, 11.0],
-          [3.8, 7.5],
-          [5.5, 11.0],
-          [4.8, 9.5],
-          [6.0, 12.0],
-          [5.2, 10.5],
-          [4.5, 9.0],
-        ],
-        // Week 3
-        [
-          [9.0, 18.0],
-          [9.5, 19.0],
-          [8.5, 17.0],
-          [12.5, 25.0],
-          [10.0, 20.0],
-          [7.0, 14.0],
-          [4.5, 9.0],
-        ],
-        // Week 4
-        [
-          [3.5, 7.0],
-          [4.0, 8.0],
-          [5.0, 10.0],
-          [3.7, 7.5],
-          [4.6, 9.2],
-          [3.5, 7.0],
-          [3.7, 7.5],
-        ],
-      ],
-    ],
-
-
-
-
-
-
-
-
-
-
-    'CR-V': [
-      // Current month
-      [
-        // Week 1
-        [
-          [2.0, 4.0],
-          [1.8, 3.5],
-          [2.2, 4.5],
-          [2.5, 5.0],
-          [2.0, 4.0],
-          [2.0, 4.0],
-          [1.6, 3.2],
-        ],
-        // Week 2
-        [
-          [10.5, 20.0],
-          [9.5, 18.0],
-          [11.5, 22.0],
-          [13.0, 25.0],
-          [10.5, 20.0],
-          [9.0, 17.0],
-          [6.5, 12.5],
-        ],
-        // Week 3
-        [
-          [1.5, 3.0],
-          [1.3, 2.5],
-          [1.6, 3.2],
-          [1.8, 3.6],
-          [1.4, 2.8],
-          [1.3, 2.6],
-          [1.6, 3.2],
-        ],
-        // Week 4
-        [
-          [4.0, 30.0],
-          [3.8, 28.0],
-          [4.5, 35.0],
-          [5.0, 38.0],
-          [4.2, 32.0],
-          [3.5, 25.0],
-          [2.8, 20.0],
-        ],
-      ],
-      // Last month
-      [
-        // Week 1
-        [
-          [1.8, 3.6],
-          [1.6, 3.2],
-          [2.0, 4.0],
-          [2.3, 4.6],
-          [1.8, 3.6],
-          [1.9, 3.8],
-          [1.5, 3.0],
-        ],
-        // Week 2
-        [
-          [9.8, 19.0],
-          [9.0, 17.0],
-          [10.8, 21.0],
-          [12.5, 24.0],
-          [10.0, 19.0],
-          [8.5, 16.0],
-          [5.8, 11.0],
-        ],
-        // Week 3
-        [
-          [1.8, 3.6],
-          [1.6, 3.2],
-          [1.8, 3.6],
-          [2.0, 4.0],
-          [1.6, 3.2],
-          [1.5, 3.0],
-          [1.7, 3.4],
-        ],
-        // Week 4
-        [
-          [3.8, 28.0],
-          [3.6, 26.0],
-          [4.2, 32.0],
-          [4.8, 36.0],
-          [4.0, 30.0],
-          [3.0, 22.0],
-          [2.2, 16.0],
-        ],
-      ],
-      // Two months ago
-      [
-        // Week 1
-        [
-          [2.0, 4.0],
-          [1.8, 3.6],
-          [2.2, 4.4],
-          [2.5, 5.0],
-          [2.0, 4.0],
-          [2.0, 4.0],
-          [1.4, 2.8],
-        ],
-        // Week 2
-        [
-          [10.0, 19.0],
-          [9.2, 18.0],
-          [11.2, 22.0],
-          [13.2, 26.0],
-          [10.2, 20.0],
-          [8.5, 17.0],
-          [5.6, 11.0],
-        ],
-        // Week 3
-        [
-          [1.6, 3.2],
-          [1.5, 3.0],
-          [1.7, 3.4],
-          [1.9, 3.8],
-          [1.5, 3.0],
-          [1.4, 2.8],
-          [1.6, 3.2],
-        ],
-        // Week 4
-        [
-          [3.9, 29.0],
-          [3.7, 27.0],
-          [4.4, 33.0],
-          [4.9, 37.0],
-          [4.1, 31.0],
-          [3.3, 24.0],
-          [2.4, 18.0],
-        ],
-      ],
-    ],
-    'Probox': [
-      // Current month
-      [
-        // Week 1
-        [
-          [20.0, 12.0],
-          [19.0, 11.0],
-          [22.0, 13.0],
-          [23.0, 14.0],
-          [20.0, 12.0],
-          [18.0, 10.5],
-          [14.0, 8.0],
-        ],
-        // Week 2
-        [
-          [6.5,  5.0],
-          [19.0, 16.0],
-          [22.0, 11.0],
-          [23.0, 12.0],
-          [20.0, 19.0],
-          [18.0, 3.5],
-          [14.0, 2.0],]
-
-      ]
-    ]
-  };
-
-  final List<String> vehicleModels = ['Prius', 'CR-V', 'Probox'];
-  String selectedModel = 'Prius';
-  
-  // Track the current viewing month (0 = current month, 1 = last month, etc.)
-  int selectedMonthOffset = 0;
-  
-  // Maximum historical months to show
-  final int maxMonths = 3;
-
-  // Get date information for week navigation
-  DateTime getStartDateForMonthOffset(int monthOffset) {
-    final now = DateTime.now();
-    return DateTime(now.year, now.month - monthOffset, 1);
+    loadData();
   }
 
-  String getMonthTitle() {
-    final date = getStartDateForMonthOffset(selectedMonthOffset);
-    return DateFormat('MMMM yyyy').format(date);
-  }
-
-  String getWeekTitle(int weekIndex) {
-    final date = getStartDateForMonthOffset(selectedMonthOffset);
-    final firstDay = DateTime(date.year, date.month, 1);
-    final weekStart = firstDay.add(Duration(days: weekIndex * 7));
-    final weekEnd = weekStart.add(const Duration(days: 6));
+  Future<void> loadData() async {
+    setState(() {
+      isLoading = true;
+    });
     
-    // Format: "May 1 - May 7"
-    return '${DateFormat('MMM d').format(weekStart)} - ${DateFormat('MMM d').format(weekEnd)}';
+    try {
+      await fetchTravelHistory();
+      if (routeIDs.isNotEmpty) {
+        await fetchRoutes();
+        await fetchVehicleModel();
+        await determineVehicleType();
+        await costCalculations();
+        await organizeWeeklyData();
+        
+        setState(() {
+          hasData = distances.isNotEmpty;
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          hasData = false;
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      print('Error loading data: $e');
+      setState(() {
+        hasData = false;
+        isLoading = false;
+      });
+    }
   }
 
-  void nextWeek() {
-    setState(() {
-      selectedWeekIndex++;
-      if (selectedWeekIndex > 3) {
-        selectedWeekIndex = 0;
-        selectedMonthOffset = (selectedMonthOffset + 1) % maxMonths;
+  // Organize data by weeks
+  Future<void> organizeWeeklyData() async {
+    if (executionDates.isEmpty) return;
+    
+    // Sort data by date
+    final List<int> indices = List.generate(executionDates.length, (index) => index);
+    indices.sort((a, b) => executionDates[a].compareTo(executionDates[b]));
+    
+    // Reorder all data lists based on sorted dates
+    executionDates = indices.map((i) => executionDates[i]).toList();
+    distances = indices.map((i) => distances[i]).toList();
+    durations = indices.map((i) => durations[i]).toList();
+    fuelConsumptions = indices.map((i) => fuelConsumptions[i]).toList();
+    evConsumptions = indices.map((i) => isElectricVehicle && i < evConsumptions.length ? evConsumptions[i] : 0.0).toList();
+    totalCosts = indices.map((i) => i < totalCosts.length ? totalCosts[i] : 0.0).toList();
+    
+    // Group data by week
+    Map<String, Map<String, dynamic>> weeks = {};
+    
+    for (int i = 0; i < executionDates.length; i++) {
+      final date = executionDates[i];
+      // Get start of week (Monday)
+      final startOfWeek = date.subtract(Duration(days: date.weekday - 1));
+      final weekKey = DateFormat('yyyy-MM-dd').format(startOfWeek);
+      final weekLabel = '${DateFormat('MMM d').format(startOfWeek)} - ${DateFormat('MMM d').format(startOfWeek.add(const Duration(days: 6)))}';
+      
+      if (!weeks.containsKey(weekKey)) {
+        weeks[weekKey] = {
+          'label': weekLabel,
+          'distances': <double>[],
+          'durations': <double>[],
+          'fuelConsumptions': <double>[],
+          'evConsumptions': <double>[],
+          'totalCosts': <double>[],
+          'distanceTime': <List<double>>[],
+          'dates': <DateTime>[],
+        };
       }
+      
+      weeks[weekKey]!['distances']!.add(distances[i]);
+      weeks[weekKey]!['durations']!.add(durations[i]);
+      weeks[weekKey]!['fuelConsumptions']!.add(fuelConsumptions[i]);
+      weeks[weekKey]!['evConsumptions']!.add(i < evConsumptions.length ? evConsumptions[i] : 0.0);
+      weeks[weekKey]!['totalCosts']!.add(i < totalCosts.length ? totalCosts[i] : 0.0);
+      weeks[weekKey]!['distanceTime']!.add([distances[i], durations[i]]);
+      weeks[weekKey]!['dates']!.add(executionDates[i]);
+    }
+    
+    // Convert to list and sort by date
+    weeklyData = weeks.entries.map((entry) => entry.value).toList();
+    weeklyData.sort((a, b) {
+      final DateTime dateA = a['dates'][0];
+      final DateTime dateB = b['dates'][0];
+      return dateB.compareTo(dateA); // Sort in descending order (newest first)
     });
+    
+    weekLabels = weeklyData.map((week) => week['label'] as String).toList();
+    
+    // Make sure selected week is valid
+    if (weeklyData.isNotEmpty && selectedWeekIndex >= weeklyData.length) {
+      selectedWeekIndex = 0;
+    }
   }
 
-  void previousWeek() {
-    setState(() {
-      selectedWeekIndex--;
-      if (selectedWeekIndex < 0) {
-        selectedWeekIndex = 3;
-        selectedMonthOffset = (selectedMonthOffset - 1) % maxMonths;
-        if (selectedMonthOffset < 0) selectedMonthOffset = maxMonths - 1;
+  // USING TRAVEL HISTORY TO GET THE ROUTES THAT HAVE BEEN COMPLETED
+  Future<void> fetchTravelHistory() async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    PocketBase pb = appProvider.pb;
+
+    final userId = appProvider.userdata?.record.id;
+    if (userId == null) return;
+
+    try {
+      // Get the driver's record using the user ID
+      final driverInfo = await pb.collection('Driver').getFirstListItem('userID = "$userId"');
+      final driverID = driverInfo.id;
+
+      // Fetch all travel history records for this driver
+      final result = await pb.collection('Travel_History').getFullList(
+        filter: 'driverID = "$driverID"',
+      );
+      
+      // Extract routeID from each result
+      routeIDs = result.map((record) => record.data['routeID'] as String).toList();
+      print("Route IDs: $routeIDs");
+    } catch (e) {
+      print('Error fetching travel history: $e');
+    }
+  }
+
+  // USING ROUTE ID TO GET THE TRIP INFORMATION
+  Future<void> fetchRoutes() async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    PocketBase pb = appProvider.pb;
+
+    if (routeIDs.isEmpty) return;
+
+    try {
+      for (String routeId in routeIDs) {
+        // Fetch route details
+        final route = await pb.collection('Route').getOne(routeId);
+        
+        // Extract data
+        distances.add(route.data['Distance'] as double);
+        durations.add(route.data['Duration'] as double);
+        executionDates.add(DateTime.parse(route.data['Execution_Date']));
+        fuelConsumptions.add(route.data['fuelConsump'] as double);
+        
+        // Add distance and time pair
+        distanceTime.add([
+          route.data['Distance'] as double,
+          route.data['Duration'] as double
+        ]);
       }
-    });
+      
+      print('Distances: $distances');
+      print('Durations: $durations');
+      print('Execution dates: $executionDates');
+      print('Fuel consumption: $fuelConsumptions');
+    } catch (e) {
+      print('Error fetching route information: $e');
+    }
+  }
+
+  // USING VEHICLE TO GET THE MODEL OF THE CAR FOR FUEL AND EV CONSUMPTION - Damelia Coleman
+  Future<void> fetchVehicleModel() async {
+    final appProvider = Provider.of<AppProvider>(context, listen: false);
+    PocketBase pb = appProvider.pb;
+
+    final userId = appProvider.userdata?.record.id;
+    if (userId == null) return;
+
+    try {
+      // Get the driver's record using the user ID
+      final driverInfo = await pb.collection('Driver').getFirstListItem('userID = "$userId"');
+      final driverID = driverInfo.id;
+
+      // Fetch all vehicle records for this driver
+      final result = await pb.collection('Vehicle').getFullList(
+        filter: 'driverID = "$driverID"',
+      );
+      
+      // Extract vehicle details
+      vehicles = result.map((record) {
+        return {
+          'VehicleMake': record.data['VehicleMake'],
+          'VehicleYear': record.data['VehicleYear'],
+          'VehicleModel': record.data['VehicleModel'],
+        };
+      }).toList();
+      
+      print("Vehicles: $vehicles");
+    } catch (e) {
+      print('Error fetching vehicles: $e');
+    }
+  }
+
+  Future<void> determineVehicleType() async {
+    if (vehicles.isEmpty) return;
+    
+    try {
+      // Use the first vehicle for simplicity
+      final vehicle = vehicles[0];
+      final fuelType = await getVehicleFuelType(
+        vehicle['VehicleMake'], 
+        vehicle['VehicleModel'], 
+        vehicle['VehicleYear']
+      );
+      
+      setState(() {
+        isElectricVehicle = fuelType == 'Electric';
+      });
+    } catch (e) {
+      print('Error determining vehicle type: $e');
+    }
+  }
+
+  //USING FUEL ECONOMY API TO GET INFORMATION ABOUT THE CAR -Damelia Coleman
+  Future<String> getVehicleFuelType(String make, String model, int year) async {
+    try {
+      // Step 1: Get vehicle ID
+      final optionsUrl = 'https://www.fueleconomy.gov/ws/rest/vehicle/menu/options?year=$year&make=$make&model=$model';
+      final optionsRes = await http.get(Uri.parse(optionsUrl));
+      final optionsXml = XmlDocument.parse(optionsRes.body);
+      final vehicleId = optionsXml.findAllElements('value').first.innerText;
+
+      // Step 2: Get vehicle details
+      final detailsUrl = 'https://www.fueleconomy.gov/ws/rest/vehicle/$vehicleId';
+      final detailsRes = await http.get(Uri.parse(detailsUrl));
+      final detailsXml = XmlDocument.parse(detailsRes.body);
+
+      final fuelType1 = detailsXml.findAllElements('fuelType1').firstOrNull?.innerText;
+      final fuelType2 = detailsXml.findAllElements('fuelType2').firstOrNull?.innerText;
+      
+      // Parse efficiency values
+      final combEElement = detailsXml.findAllElements('combE').firstOrNull;
+      if (combEElement != null) {
+        combE = double.tryParse(combEElement.innerText);
+      }
+      
+      final charge120Element = detailsXml.findAllElements('charge120').firstOrNull;
+      if (charge120Element != null) {
+        chargeTime120 = double.tryParse(charge120Element.innerText) ?? 0.0;
+      }
+      
+      final charge240Element = detailsXml.findAllElements('charge240').firstOrNull;
+      if (charge240Element != null) {
+        chargeTime240 = double.tryParse(charge240Element.innerText) ?? 0.0;
+      }
+
+      // Determine vehicle type
+      if (fuelType1 == 'Electricity' || fuelType2 == 'Electricity') {
+        return 'Electric';
+      } else if (fuelType2 != null) {
+        return 'Hybrid';
+      } else {
+        return 'Gasoline';
+      }
+    } catch (e) {
+      print('Error getting vehicle fuel type: $e');
+      return 'Gasoline'; // Default to gasoline
+    }
+  }
+
+  //CALCULATING TOTAL COST FOR ELECTRIC CARS, HYBRID (EXCLUDING PLUGIN HYBRID) AND GASOLINE - Damelia Coleman
+  Future<void> costCalculations() async {
+    if (vehicles.isEmpty || distances.isEmpty) return;
+    
+    try {
+      totalCosts = [];
+      evConsumptions = [];
+      
+      if (isElectricVehicle && combE != null) {
+        // Calculate EV consumption and cost
+        for (var dist in distances) {
+          final evUsed = (combE! / 100) * dist;
+          evConsumptions.add(evUsed);
+          
+          // Use charge time for cost calculation
+          final chargeTime = chargeTime240 > 0 ? chargeTime240 : chargeTime120;
+          totalCosts.add(chargeTime * evPrice);
+        }
+      } else {
+        // Calculate gas cost
+        for (var usage in fuelConsumptions) {
+          totalCosts.add(usage * avgGasPrice);
+        }
+      }
+    } catch (e) {
+      print('Error calculating costs: $e');
+    }
+  }
+
+  // Get chart data for the selected week
+  List<FlSpot> getWeeklyCostLineData() {
+    if (!hasData || weeklyData.isEmpty) return [];
+    
+    final weekCosts = weeklyData[selectedWeekIndex]['totalCosts'] as List<double>;
+    return weekCosts.asMap().entries.map((entry) {
+      return FlSpot(entry.key.toDouble(), entry.value);
+    }).toList();
+  }
+
+  List<BarChartGroupData> getWeeklyConsumptionBarGroups() {
+    if (!hasData || weeklyData.isEmpty) return [];
+    
+    final List<double> weekConsumption = isElectricVehicle 
+      ? (weeklyData[selectedWeekIndex]['evConsumptions'] as List<double>)
+      : (weeklyData[selectedWeekIndex]['fuelConsumptions'] as List<double>);
+    
+    return weekConsumption.asMap().entries.map((entry) {
+      int index = entry.key;
+      double consumption = entry.value;
+      return BarChartGroupData(x: index, barRods: [
+        BarChartRodData(
+          toY: consumption,
+          width: 25,
+          color: isElectricVehicle ? Colors.green : Colors.blue,
+          borderRadius: BorderRadius.circular(2),
+        ),
+      ]);
+    }).toList();
+  }
+
+  List<List<double>> getWeeklyDistanceTime() {
+    if (!hasData || weeklyData.isEmpty) return [];
+    return (weeklyData[selectedWeekIndex]['distanceTime'] as List<dynamic>)
+        .cast<List<double>>();
+  }
+
+  // Generate weekly summary text
+  String getWeeklySummary() {
+    if (!hasData || weeklyData.isEmpty) return "No weekly data available";
+    
+    final weekData = weeklyData[selectedWeekIndex];
+    final distances = weekData['distances'] as List<double>;
+    final durations = weekData['durations'] as List<double>;
+    final costs = weekData['totalCosts'] as List<double>;
+    
+    final totalDistance = distances.fold(0.0, (sum, item) => sum + item);
+    final totalDuration = durations.fold(0.0, (sum, item) => sum + item);
+    final totalCost = costs.fold(0.0, (sum, item) => sum + item);
+    final tripCount = distances.length;
+    
+    final formatter = NumberFormat("#,##0.00");
+    
+    return "Week Summary: $tripCount trips\n"
+           "Total Distance: ${formatter.format(totalDistance)} km\n"
+           "Total Duration: ${formatter.format(totalDuration)} minutes\n"
+           "Total Cost: \$${formatter.format(totalCost)}";
   }
 
   @override
   Widget build(BuildContext context) {
-    // Get the selected data for the current week and month
-    final selectedCost = vehicleModelCostsHistory[selectedModel]![selectedMonthOffset][selectedWeekIndex];
-    final selectedFuel = vehicleModelFuelHistory[selectedModel]![selectedMonthOffset][selectedWeekIndex];
-    final selectedSegments = vehicleModelSegmentsHistory[selectedModel]![selectedMonthOffset][selectedWeekIndex];
-    
-    final spots = List.generate(
-      selectedCost.length,
-      (index) => FlSpot(index.toDouble(), selectedCost[index]),
-    );
-
-    final List<Widget> graphWidgets = [
-      MyStackedBarGraph(tripSegments: selectedSegments),
-      MyLineGraph(
-        dataPoints: spots,
-        maxY: selectedCost.reduce((a, b) => a > b ? a : b) + 200,
-      ),
-      MyBarGraph(
-        barGroups: selectedFuel.asMap().entries.map((entry) {
-          return BarChartGroupData(x: entry.key, barRods: [
-            BarChartRodData(toY: entry.value, width: 25, color: Colors.green, borderRadius: BorderRadius.circular(2)),
-          ]);
-        }).toList(),
-        maxY: selectedFuel.reduce((a, b) => a > b ? a : b) + 2,
-        leftAxisLabel: selectedModel == 'CR-V' ? 'kWh Used' : 'Fuel (L)',
-        bottomAxisLabel: 'Week',
-        bottomTitles: ['Wk1', 'Wk2', 'Wk3', 'Wk4'],
-      )
-    ];
-
-    return Consumer<AppProvider>(
-      builder: (builder , app , child)=>FScaffold(
-        header: FHeader(
-          actions: [
-            FButton(onPress: () async{
-              await app.trends();
-            }, label: Text('Sync'))
-          ],
-          title: Stack(
-            alignment: Alignment.center,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () {
-                    // Navigator.pop(context); //TODO chnage it back to replacement
-                    Navigator.pushReplacement(context, MaterialPageRoute(builder: (context)=>MyHomePage(title: 'SDAR')));
-                  },
-                  icon: const Icon(Icons.arrow_back, color: Colors.black),
-                ),
+    return Scaffold(
+      appBar: AppBar(title: Stack(
+          alignment: Alignment.center,
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                onPressed: () {
+                  // Your onPressed logic here
+                  Navigator.pushReplacement(
+                    context, MaterialPageRoute(builder: (context) => MyHomePage(title: 'SDAR')),
+                  );
+                },
+                icon: const Icon(Icons.arrow_back, color: Colors.black),
               ),
-              const Center(child: Text("Travel Trends")),
-            ],
-          ),
-        ),
-        footer: AppNavbar(index: 0),
-        content: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Vehicle model selection
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: 
-                ToggleButtons(
-                  isSelected: vehicleModels.map((m) => m == selectedModel).toList(),
-                  onPressed: (index) => setState(() => selectedModel = vehicleModels[index]),
-                  children: vehicleModels.map((model) => Padding(padding: const EdgeInsets.all(8), child: Text(model))).toList(),
-                ),
-                ),
-                const SizedBox(height: 20),
+            ),
+            Center(
+              child: Text(
+                "Travel Trends",
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: Colors.black),
                 
-                // Graph type selection
+              ),
+            ),
+          ],
+        )),
+      bottomNavigationBar: AppNavbar(index: 0),
+      body: isLoading 
+        ? const Center(child: CircularProgressIndicator())
+        : !hasData 
+          ? const Center(child: Text("No Trends available", style: TextStyle(fontSize: 18)))
+          : Column(
+              children: [
+                // Week selector
+                if (weekLabels.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: DropdownButton<int>(
+                      isExpanded: true,
+                      value: selectedWeekIndex,
+                      items: weekLabels.asMap().entries.map((entry) {
+                        return DropdownMenuItem<int>(
+                          value: entry.key,
+                          child: Text(entry.value),
+                        );
+                      }).toList(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          setState(() {
+                            selectedWeekIndex = value;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                  
+                  // Weekly summary
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(243, 246, 243, 1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        getWeeklySummary(),
+                        style: const TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  ),
+                ],
+                
+                // Graph type toggle buttons
                 ToggleButtons(
-                  isSelected: List.generate(3, (i) => i == selectedGraphIndex),
-                  onPressed: (index) => setState(() => selectedGraphIndex = index),
+                  isSelected: [0, 1, 2].map((i) => i == selectedGraphIndex).toList(),
+                  onPressed: (index) {
+                    setState(() {
+                      selectedGraphIndex = index;
+                    });
+                  },
                   children: const [
                     Padding(padding: EdgeInsets.all(8), child: Text('Distance and Time')),
-                    Padding(padding: EdgeInsets.all(8), child: Text('Estimated Cost')),
+                    Padding(padding: EdgeInsets.all(8), child: Text('Cost')),
                     Padding(padding: EdgeInsets.all(8), child: Text('Consumption')),
                   ],
                 ),
                 
                 const SizedBox(height: 20),
                 
-                // Week navigation controls
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.arrow_back_ios),
-                      onPressed: previousWeek,
-                    ),
-                    Column(
-                      children: [
-                        Text(
-                          getMonthTitle(),
-                          style: const TextStyle(fontWeight: FontWeight.bold),
-                        ),
-                        Text(
-                          getWeekTitle(selectedWeekIndex),
-                          style: const TextStyle(fontSize: 12),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.arrow_forward_ios),
-                      onPressed: nextWeek,
-                    ),
-                  ],
-                ),
-                
-                const SizedBox(height: 20),
-                
-                // Graph display
-                AspectRatio(aspectRatio: 1.6, child: graphWidgets[selectedGraphIndex]),
-                
-                const SizedBox(height: 16),
-                
-                // Additional weekly summary
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Weekly Summary",
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        _buildSummaryItem("Total Distance", 
-                          "${selectedSegments[0][0]} km", 
-                          Icons.straighten),
-                        _buildSummaryItem("Total Time", 
-                          "${selectedSegments[0][1]} min", 
-                          Icons.access_time),
-                        _buildSummaryItem("Cost", 
-                          "\$${selectedCost[0].toStringAsFixed(2)}", 
-                          Icons.attach_money),
-                        _buildSummaryItem(
-                          selectedModel == 'CR-V' ? "Energy Used" : "Fuel Used", 
-                          selectedModel == 'CR-V' 
-                            ? "${selectedFuel[0].toStringAsFixed(1)} kWh" 
-                            : "${selectedFuel[0].toStringAsFixed(1)} L", 
-                          selectedModel == 'CR-V' ? Icons.battery_charging_full : Icons.local_gas_station),
-                      ],
-                    ),
-                  ),
+                // Display the selected graph
+                Expanded(
+                  child: weeklyData.isEmpty
+                    ? const Center(child: Text("No Trends available"))
+                    : IndexedStack(
+                        index: selectedGraphIndex,
+                        children: [
+                          // Stacked bar graph for Distance and Time
+                          MyStackedBarGraph(tripSegments: getWeeklyDistanceTime()),
+                          
+                          // Line graph for Total Cost
+                          MyLineGraph(
+                            dataPoints: getWeeklyCostLineData(),
+                            maxY: (weeklyData[selectedWeekIndex]['totalCosts'] as List<double>)
+                                .fold(0.0, (max, cost) => cost > max ? cost : max),
+                          ),
+                          
+                          // Bar graph for Fuel/EV Consumption
+                          MyBarGraph(barGroups: getWeeklyConsumptionBarGroups())
+                        ],
+                      ),
                 ),
               ],
             ),
-          ),
-        ),
-      ),
-    );
-  }
-  
-  Widget _buildSummaryItem(String label, String value, IconData icon) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Icon(icon, size: 20, color: Colors.grey[700]),
-          const SizedBox(width: 8),
-          Text(
-            "$label: ",
-            style: const TextStyle(fontWeight: FontWeight.w500),
-          ),
-          Text(value),
-        ],
-      ),
     );
   }
 }
