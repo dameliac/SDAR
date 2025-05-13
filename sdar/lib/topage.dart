@@ -38,7 +38,7 @@ class _TopageState extends State<Topage> {
 
      void _onSearchChanged(String query) {
     if (_debounce?.isActive ?? false) _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 100), () async {
+    _debounce = Timer(const Duration(milliseconds: 500), () async {
       // Only search if query has 3 or more characters
       if (query.length >= 3) {
        Provider.of<AppProvider>(context,listen: false).getSearchOptions(query);

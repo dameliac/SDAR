@@ -66,76 +66,6 @@ class AppProvider extends ChangeNotifier {
   SearchLocation? selectedFromLocation;
   SearchLocation? selectedToLocation;
 
-  List<Map<String, dynamic>> estimate = [];
-
-
-
-  Future<void> getEstimates () async{
-
-    estimate.clear();
-
-    final records = await pb.collection('Route').getFullList(
-  // sort: '-someField',
-);
-
-  // 'startLoc':'Home',
-  //   'destination': 'Alligator Pond, St Elizabeth',
-  //   'distance': 30.5,
-  //   'date': DateTime(2025,6,23),
-  //   'timelength': 1.5,
-  //   'Make': 'Toyota',
-  //   'Model': 'CR-V',
-  //   'Price': 143.4,
-  //   'Usage': '75 litres/100 km',
-  //   'cost':3217.50
-
-   String startLoc = '';
-    String destination = '';
-    final double avgGasPrice = 127.0512;
-    final DateTime date = DateTime.now();
-    double  duration = 0.0;
-     String make = '';
-     String model = '';
-     double usage = 0.0; //fuel or ev usage
-    double cost = 0.0;
-     double EVchargePrice = 90;
-
-
-
-  for(var record in records){
-    startLoc = record.getStringValue('Start_Location');
-    destination = record.getStringValue('End_Location');
-    duration = record.getDoubleValue('Duration');
-    final fuelComsump = record.getDoubleValue('fuelConsump');
-    cost = fuelComsump * avgGasPrice;
-
-    final driver = await getDriverID();
-    final vehicle = await pb.collection('Vehicle').getFirstListItem(
-  'driverID="$driver"',
-
-);
-
-make = vehicle.getStringValue('VehicleMake');
-model = vehicle.getStringValue('VehicleModel');
-
-  estimate.add(
-    {
-      'startLoc':startLoc,
-    'destination': destination,
-    'distance': duration,
-    'date': DateTime(2025,6,23),
-    'timelength': duration,
-    'Make': make,
-    'Model': model,
-    'Price': avgGasPrice,
-    'Usage': '75 litres/100 km',
-    'cost': cost
-    }
-  );
-  }
-
-  notifyListeners();
-  }
   void setIndex(int i) {
     index = i;
     notifyListeners();
@@ -288,9 +218,7 @@ return success;
   }
 
   Future<void> getSearchOptions(String value) async {
-
     searchResults.clear();
-
     final response = await dio.get('http://localhost:9002/autocomplete/$value');
     // print(response.data["data"]);
     for (var data in response.data["data"]) {
@@ -320,28 +248,6 @@ return success;
     duration = response.data['data']['duration'];
 
     notifyListeners();
-  }
-
-
-  Future<List> trends() async {
-    //TODO get a list of distance and time
-    var week1  = [];
-
-
-    final records = await pb.collection('Route').getFullList(
-  // sort: '-someField',
-);
-
-print(records);
-for (var record in records){
-    final distance= record.getDoubleValue('Distance');
-    final time = record.getDoubleValue('Duration');
-    week1.add([distance,time]);
-
-}
-
-return week1;
-
   }
 
    Future <List<LatLng>> getPolyline(start, end) async {
