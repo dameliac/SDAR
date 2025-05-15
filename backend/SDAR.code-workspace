@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "acutator_arm",
+			"path": "../../../work/ceres/ceres_code/acutator_arm"
+		}
+	],
+	"settings": {}
+}

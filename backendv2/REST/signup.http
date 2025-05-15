@@ -1,0 +1,14 @@
+
+POST http://localhost:3000/signup HTTP/1.1
+Content-Type: application/json
+
+{
+  "firstname" : "John",
+  "lastname": "Doe",
+  "email" : "johndoe@user24.com",
+  "password" :"HelloWorld",
+  "vehicletype": "electric",
+  "preferences" : {
+    "shortest_routes" : true
+  }
+}
