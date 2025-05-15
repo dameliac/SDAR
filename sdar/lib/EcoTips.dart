@@ -51,7 +51,7 @@ class _StateTips extends State<Tips> {
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   textStyle: TextStyle(
-                    fontSize: 30,
+                    fontSize: 20,
                     fontWeight: FontWeight.w700,
                     color: Colors.black,
                   ),
