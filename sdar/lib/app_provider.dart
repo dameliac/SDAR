@@ -122,7 +122,7 @@ void stopCommuteChecks() {
 
   void startCommuteChecks() {
     print("Started");
-    if (!isInitialized || !isLoggedIn || store.record == null) {
+    if (store.record == null) {
       print("Commute checks cannot start: App not initialized, user not logged in, or user record is null.");
       return;
     }
